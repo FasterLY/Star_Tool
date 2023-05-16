@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="bytes_tool">
+      <UniqueIdentifier>{59438228-67eb-4f9c-ae29-332bf222bbd4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thread_tool">
+      <UniqueIdentifier>{1aef5c56-4fdc-4155-93c4-58db4d85bc92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thread_lock">
+      <UniqueIdentifier>{967f20b4-35cc-4c97-a155-838d8b196e54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="safe_container">
+      <UniqueIdentifier>{e5e689dd-fba7-4af5-a0ae-31f61fd1b1c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="safe_container\mutex">
+      <UniqueIdentifier>{5735504b-9e17-4204-a3f1-8935aef0f8e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="safe_container\no_mutex">
+      <UniqueIdentifier>{9212dd7d-85a6-40b6-98c4-fb25cda66f82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tool">
+      <UniqueIdentifier>{e72af95f-f012-4676-8bf3-11441bdbf6da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="net_tool">
+      <UniqueIdentifier>{227dee07-25fa-4ca2-a8ea-d2973e2a8bd0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="bytes_tool\byte_array.h">
+      <Filter>bytes_tool</Filter>
+    </ClInclude>
+    <ClInclude Include="bytes_tool\byte_loader.h">
+      <Filter>bytes_tool</Filter>
+    </ClInclude>
+    <ClInclude Include="safe_container\no_mutex\stack.h">
+      <Filter>safe_container\no_mutex</Filter>
+    </ClInclude>
+    <ClInclude Include="safe_container\no_mutex\queue.h">
+      <Filter>safe_container\no_mutex</Filter>
+    </ClInclude>
+    <ClInclude Include="safe_container\mutex\queue.h">
+      <Filter>safe_container\mutex</Filter>
+    </ClInclude>
+    <ClInclude Include="safe_container\mutex\stack.h">
+      <Filter>safe_container\mutex</Filter>
+    </ClInclude>
+    <ClInclude Include="thread_tool\thread.h">
+      <Filter>thread_tool</Filter>
+    </ClInclude>
+    <ClInclude Include="thread_tool\thread_pool.h">
+      <Filter>thread_tool</Filter>
+    </ClInclude>
+    <ClInclude Include="tool\array.h">
+      <Filter>tool</Filter>
+    </ClInclude>
+    <ClInclude Include="net_tool\tcp_socket.h">
+      <Filter>net_tool</Filter>
+    </ClInclude>
+    <ClInclude Include="net_tool\udp_socket.h">
+      <Filter>net_tool</Filter>
+    </ClInclude>
+    <ClInclude Include="net_tool\cpp\net_shared.cpp">
+      <Filter>net_tool</Filter>
+    </ClInclude>
+    <ClInclude Include="constructor\dictionary.h" />
+    <ClInclude Include="tool\getter_setter.h" />
+    <ClInclude Include="constructor\serialize.h" />
+    <ClInclude Include="tool\hash_val.h" />
+    <ClInclude Include="tool\value_translate.h" />
+    <ClInclude Include="thread_tool\interrupt_cin.h" />
+    <ClInclude Include="cs2.cpp" />
+    <ClInclude Include="algorithm\async_quick_sort.h" />
+    <ClInclude Include="net_tool\net_shared.h" />
+    <ClInclude Include="thread_tool\cpp\thread_pool.cpp" />
+    <ClInclude Include="tool\shared_ptr.h" />
+    <ClInclude Include="cs3.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="cs.cpp">
+      <Filter>thread_tool</Filter>
+    </ClCompile>
+    <ClCompile Include="bytes_tool\cpp\byte_array.cpp" />
+    <ClCompile Include="net_tool\cpp\tcp_socket.cpp" />
+    <ClCompile Include="net_tool\cpp\udp_socket.cpp" />
+    <ClCompile Include="bytes_tool\cpp\byte_loader.cpp" />
+    <ClCompile Include="cs3.cpp" />
+    <ClCompile Include="thread_tool\cpp\thread.cpp" />
+    <ClCompile Include="thread_tool\cpp\interrupt_cin.cpp" />
+  </ItemGroup>
+</Project>
