@@ -69,7 +69,6 @@
     <ClInclude Include="algorithm\async_quick_sort.h" />
     <ClInclude Include="thread_tool\cpp\thread_pool.cpp" />
     <ClInclude Include="tool\shared_ptr.h" />
-    <ClInclude Include="cs3.h" />
     <ClInclude Include="net_tool\net_shared.h" />
   </ItemGroup>
   <ItemGroup>

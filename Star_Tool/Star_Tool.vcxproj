@@ -153,7 +153,6 @@
     <ClInclude Include="tool\hash_val.h" />
     <ClInclude Include="tool\shared_ptr.h" />
     <ClInclude Include="tool\value_translate.h" />
-    <ClInclude Include="cs3.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bytes_tool\cpp\byte_loader.cpp" />
