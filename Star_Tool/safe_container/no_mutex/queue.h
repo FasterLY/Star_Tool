@@ -11,7 +11,7 @@ namespace star {
 			class queue
 			{
 				/*
-				*
+				* 本节无锁队列详细代码摘自C++并行实战（第二版）内容并整理代码头部分布
 				*/
 			public:
 				queue();
@@ -30,28 +30,33 @@ namespace star {
 			};
 
 			template<typename T>
-			inline queue<T>::queue() :head(), tail(head.load()) {}
+			inline queue<T>::queue() :head{ counted_node_ptr{0,new node{}} }, tail{ head.load() } {}
 
 			template<typename T>
 			inline queue<T>::~queue()
 			{
-
+				while (this->pop() != nullptr);
+				delete (this->head.load()).ptr;
 			}
 
 			template<typename T>
 			inline void queue<T>::push(T data)
 			{
-				std::unique_ptr<T> new_data(std::make_unique<T>(data));
+				std::unique_ptr<T> new_data(new T(data));
 				counted_node_ptr new_next;
-				new_next.ptr = new node;
+				new_next.ptr = new node{};
 				new_next.external_count = 1;
 				counted_node_ptr old_tail = tail.load();
-				while (true) {
+				while(true)
+				{
 					increase_external_count(tail, old_tail);
 					T* old_data = nullptr;
-					if (old_tail.ptr->data.compare_exchange_strong(old_data, new_data.get())) {
-						counted_node_ptr old_next = { 0 };
-						if (!old_tail.ptr->next.compare_exchange_strong(old_next, new_next)) {
+					if (old_tail.ptr->data.compare_exchange_strong(old_data, new_data.get()))
+					{
+						counted_node_ptr old_next{};
+						if (!old_tail.ptr->next.compare_exchange_strong(
+							old_next, new_next))
+						{
 							delete new_next.ptr;
 							new_next = old_next;
 						}
@@ -59,9 +64,12 @@ namespace star {
 						new_data.release();
 						break;
 					}
-					else {
-						counted_node_ptr old_next = { 0 };
-						if (old_tail.ptr->next.compare_exchange_strong(old_next, new_next)) {
+					else
+					{
+						counted_node_ptr old_next{};
+						if (old_tail.ptr->next.compare_exchange_strong(
+							old_next, new_next))
+						{
 							old_next = new_next;
 							new_next.ptr = new node;
 						}
@@ -141,7 +149,9 @@ namespace star {
 			};
 
 			template<typename T>
-			inline queue<T>::node::node() {
+			inline queue<T>::node::node()
+				:data(nullptr)
+			{
 				node_counter new_count;
 				new_count.internal_count = 0;
 				new_count.external_counters = 2;
@@ -179,6 +189,7 @@ namespace star {
 				unsigned internal_count : 30;
 				unsigned external_counters : 2;
 			};
+			
 		}
 	}
 

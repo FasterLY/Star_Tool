@@ -17,6 +17,7 @@ namespace star {
 		interrupt_except();
 		void set_msg(std::string& msg);
 		virtual const char* what() const throw() override;
+		void clear();
 	};
 	namespace this_thread {
 #ifndef STAR_THREAD_CPP_REX
@@ -26,6 +27,7 @@ namespace star {
 		void interrupt();
 		void interrupt(std::string msg);
 		void try_interrepted() noexcept(false);
+		void clear();
 	}
 	class thread : public std::thread {
 	public:
@@ -35,7 +37,7 @@ namespace star {
 		thread(Function&& function);
 		void interrupt();
 		void interrupt(std::string msg);
-	protected:
+		void clear();
 		void try_interrepted()  noexcept(false);
 	private:
 		std::shared_ptr<std::atomic<bool>> interrupt_ptr;

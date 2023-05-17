@@ -47,12 +47,19 @@ public:
 #include"thread_tool/thread.h"
 #include"bytes_tool/byte_array.h"
 #include"safe_container/no_mutex/queue.h"
-#include"cs3.h"
 namespace star {
 	extern int i;
 }
 int main() {
 	star::safe_container::no_mutex::queue<int> que;
+	que.push(10);
+	que.push(20);
+	que.push(30);
+	cout << *(que.pop()) << endl;
+	atomic<int*> ptr{ nullptr };
+	int* pt = nullptr;
+	ptr.compare_exchange_strong(pt, new int(10));
+
 	star::byte_builder build{};
 	build.pusb_back("abcdefghij", 10);
 	auto func = []() {

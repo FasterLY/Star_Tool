@@ -27,6 +27,10 @@ namespace star {
 	{
 		return error_msg.c_str();
 	}
+
+	void interrupt_except::clear() {
+		this->error_msg.clear();
+	}
 	
 	namespace this_thread {
 		void interrupt() {
@@ -42,6 +46,11 @@ namespace star {
 			if (interrupt_ptr_local->load(std::memory_order_acquire)) {
 				throw* (interrupt_msg_ptr_local);
 			}
+		}
+		void clear()
+		{
+			interrupt_ptr_local->store(false, std::memory_order_release);
+			interrupt_msg_ptr_local->clear();
 		}
 	}
 
@@ -60,6 +69,12 @@ namespace star {
 		if (this->interrupt_ptr->load(std::memory_order_acquire)) {
 			throw* (this->interrupt_msg_ptr);
 		}
+	}
+
+	void thread::clear() 
+	{
+		interrupt_ptr->store(false, std::memory_order_release);
+		this->interrupt_msg_ptr->clear();
 	}
 	
 }
