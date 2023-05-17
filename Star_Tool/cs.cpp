@@ -1,5 +1,6 @@
 #include<iostream>
 #include<vector>
+#include"net_tool/tcp_socket.h"
 #include"tool/array.h"
 #include"tool/hash_val.h"
 #ifdef _WIN32
@@ -45,13 +46,13 @@ public:
 #include"tool/shared_ptr.h"
 #include"thread_tool/thread.h"
 #include"bytes_tool/byte_array.h"
-
+#include"safe_container/no_mutex/queue.h"
 #include"cs3.h"
 namespace star {
 	extern int i;
 }
 int main() {
-	
+	star::safe_container::no_mutex::queue<int> que;
 	star::byte_builder build{};
 	build.pusb_back("abcdefghij", 10);
 	auto func = []() {
@@ -63,6 +64,7 @@ int main() {
 			cout << err.what() << endl;
 		}
 	};
+	star::tcp_socket_server ser(8888);
 	star::thread th1(func);
 	th1.join();
 	

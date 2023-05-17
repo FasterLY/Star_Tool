@@ -1,3 +1,7 @@
+#ifndef NET_SHARED_CPP
+#define NET_SHARED_CPP
+#endif // !NET_SHARED_CPP
+
 #include"../net_shared.h"
 
 namespace star {
@@ -9,21 +13,17 @@ namespace star {
 	{
 		return error_msg.c_str();
 	}
+	
 }
 
 #ifdef _WIN32
-#pragma comment(lib,"ws2_32.lib")		//链接动态库
-#ifndef _WINSOCKAPI_
-#include <Winsock2.h>  
-#include<WS2tcpip.h>
-#endif
 namespace star {
 	std::atomic<bool> isInitialize(false);
 	//封装动态链接库的初始化方法
 	class Windows_net_Initialize {
 	public:
 		Windows_net_Initialize() {
-			if (isInitialize.load(std::memory_order_acquire)) {
+			if (!isInitialize.load(std::memory_order_acquire)) {
 				WORD wVersionRequested;
 				WSADATA wsadata;
 				int err;
@@ -46,8 +46,14 @@ namespace star {
 			WSACleanup();
 			std::cout << "WSA net_tool uninstall succeed" << std::endl;
 		}
+		
 	};			//封装动态链接库的初始化方法
-	const Windows_net_Initialize windows_net_initialize;		//初始化链接动态库环境的对象
+	static std::shared_ptr<Windows_net_Initialize> windows_net_initialize_ptr;		//初始化链接动态库环境的对象
+	std::once_flag net_Initialize_flag;
+	void net_Initialize()
+	{
+		windows_net_initialize_ptr = std::make_shared<Windows_net_Initialize>();
+	}
 }
 
 #elif  __linux__

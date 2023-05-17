@@ -60,32 +60,28 @@
     <ClInclude Include="net_tool\udp_socket.h">
       <Filter>net_tool</Filter>
     </ClInclude>
-    <ClInclude Include="net_tool\cpp\net_shared.cpp">
-      <Filter>net_tool</Filter>
-    </ClInclude>
     <ClInclude Include="constructor\dictionary.h" />
     <ClInclude Include="tool\getter_setter.h" />
     <ClInclude Include="constructor\serialize.h" />
     <ClInclude Include="tool\hash_val.h" />
     <ClInclude Include="tool\value_translate.h" />
     <ClInclude Include="thread_tool\interrupt_cin.h" />
-    <ClInclude Include="cs2.cpp" />
     <ClInclude Include="algorithm\async_quick_sort.h" />
-    <ClInclude Include="net_tool\net_shared.h" />
     <ClInclude Include="thread_tool\cpp\thread_pool.cpp" />
     <ClInclude Include="tool\shared_ptr.h" />
     <ClInclude Include="cs3.h" />
+    <ClInclude Include="net_tool\net_shared.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cs.cpp">
       <Filter>thread_tool</Filter>
     </ClCompile>
     <ClCompile Include="bytes_tool\cpp\byte_array.cpp" />
-    <ClCompile Include="net_tool\cpp\tcp_socket.cpp" />
     <ClCompile Include="net_tool\cpp\udp_socket.cpp" />
     <ClCompile Include="bytes_tool\cpp\byte_loader.cpp" />
-    <ClCompile Include="cs3.cpp" />
     <ClCompile Include="thread_tool\cpp\thread.cpp" />
     <ClCompile Include="thread_tool\cpp\interrupt_cin.cpp" />
+    <ClCompile Include="net_tool\cpp\net_shared.cpp" />
+    <ClCompile Include="net_tool\cpp\tcp_socket.cpp" />
   </ItemGroup>
 </Project>

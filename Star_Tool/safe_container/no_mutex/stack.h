@@ -6,6 +6,9 @@ namespace star {
 		namespace no_mutex {
 			template<class T>
 			class stack {
+				/*
+				*当前无锁栈容器是否无锁取决于标准库内shared_ptr是否是无锁实现。
+				*/
 			private:
 				struct node {
 					std::shared_ptr<T> data;

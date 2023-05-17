@@ -141,7 +141,6 @@
     <ClInclude Include="tool\array.h" />
     <ClInclude Include="bytes_tool\byte_array.h" />
     <ClInclude Include="bytes_tool\byte_loader.h" />
-    <ClInclude Include="net_tool\cpp\net_shared.cpp" />
     <ClInclude Include="safe_container\no_mutex\queue.h" />
     <ClInclude Include="safe_container\mutex\queue.h" />
     <ClInclude Include="safe_container\mutex\stack.h" />
@@ -154,14 +153,13 @@
     <ClInclude Include="tool\hash_val.h" />
     <ClInclude Include="tool\shared_ptr.h" />
     <ClInclude Include="tool\value_translate.h" />
-    <ClInclude Include="cs2.cpp" />
     <ClInclude Include="cs3.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bytes_tool\cpp\byte_loader.cpp" />
     <ClCompile Include="bytes_tool\cpp\byte_array.cpp" />
     <ClCompile Include="cs.cpp" />
-    <ClCompile Include="cs3.cpp" />
+    <ClCompile Include="net_tool\cpp\net_shared.cpp" />
     <ClCompile Include="net_tool\cpp\tcp_socket.cpp" />
     <ClCompile Include="net_tool\cpp\udp_socket.cpp" />
     <ClCompile Include="thread_tool\cpp\interrupt_cin.cpp" />

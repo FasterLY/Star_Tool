@@ -4,10 +4,6 @@
 #ifdef _WIN32
 namespace star {
 	extern std::atomic<bool> isInitialize;
-	union socket_addr {
-		sockaddr_in ipv4;
-		sockaddr_in6 ipv6;
-	};
 	class tcp_socket_server;
 	class tcp_socket {
 	private:
@@ -40,7 +36,7 @@ namespace star {
 		tcp_socket_server(std::string ip, unsigned short port,
 			int connect_num = SOMAXCONN,
 			star::ip_type IP_type = star::ip_type::ipv4);
-		tcp_socket_server(short port, int connect_num = SOMAXCONN,
+		tcp_socket_server(unsigned short port, int connect_num = SOMAXCONN,
 			star::ip_type IP_type = star::ip_type::ipv4);
 		tcp_socket accept();
 		unsigned short getPort();
@@ -54,10 +50,6 @@ namespace star {
 #include<arpa/inet.h>
 #include<unistd.h>
 namespace star {
-	union socket_addr {
-		sockaddr_in ipv4;
-		sockaddr_in6 ipv6;
-	};
 	class tcp_socket_server;
 	class tcp_socket {
 	private:

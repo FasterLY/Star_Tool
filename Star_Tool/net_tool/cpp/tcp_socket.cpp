@@ -1,13 +1,13 @@
 #include"../tcp_socket.h"
 #ifdef WIN32
 namespace star {
-	inline tcp_socket::tcp_socket()
+	tcp_socket::tcp_socket()
 		:socket_client(INVALID_SOCKET), IP_type(star::ip_type::ipv4), close_flag(false)
 	{
 		memset(&ip_address, 0, sizeof(socket_addr));
 	}
 
-	inline tcp_socket::tcp_socket(tcp_socket&& MoveSource) noexcept
+	tcp_socket::tcp_socket(tcp_socket&& MoveSource) noexcept
 		: close_flag(MoveSource.close_flag.load()), socket_client(std::move(MoveSource.socket_client)),
 		ip_address(std::move(MoveSource.ip_address)), address_len(MoveSource.address_len),
 		IP_type(MoveSource.IP_type)
@@ -16,10 +16,11 @@ namespace star {
 		MoveSource.close_flag.store(false, std::memory_order_release);
 	}
 
-	inline tcp_socket::tcp_socket(std::string ip, unsigned short port, star::ip_type IP_type)
+	tcp_socket::tcp_socket(std::string ip, unsigned short port, star::ip_type IP_type)
 		:close_flag(false), IP_type(IP_type)
 	{
 		int ret;
+		std::call_once(star::net_Initialize_flag, star::net_Initialize);
 		if (!isInitialize.load()) {
 			throw net_exception("windows net initialize fail!\n");
 		}
@@ -59,7 +60,7 @@ namespace star {
 		}
 	}
 
-	inline int tcp_socket::read(char* buffer, int len, int offset) {
+	int tcp_socket::read(char* buffer, int len, int offset) {
 		if (!this->close_flag.load(std::memory_order::memory_order_acquire)) {
 			int recv_len = ::recv(this->socket_client, buffer + offset, len, 0);
 			return recv_len;
@@ -69,7 +70,7 @@ namespace star {
 		}
 	}
 
-	inline int tcp_socket::write(char* buffer, int len, int offset) {
+	int tcp_socket::write(char* buffer, int len, int offset) {
 		if (!this->close_flag.load(std::memory_order::memory_order_acquire)) {
 			int send_len = ::send(this->socket_client, buffer + offset, len, 0);
 			return send_len;
@@ -79,12 +80,12 @@ namespace star {
 		}
 	}
 
-	inline void tcp_socket::close() {
+	void tcp_socket::close() {
 		this->close_flag.store(true, std::memory_order::memory_order_release);
 		closesocket(this->socket_client);
 	}
 
-	inline void tcp_socket_server::Initialize(unsigned short port)
+	void tcp_socket_server::Initialize(unsigned short port)
 	{
 		switch (this->IP_type)
 		{
@@ -109,10 +110,11 @@ namespace star {
 		listen(this->socket_server, this->connect_num);
 	}
 
-	inline tcp_socket_server::tcp_socket_server(std::string ip, unsigned short port, int connect_num, star::ip_type IP_type)
+	tcp_socket_server::tcp_socket_server(std::string ip, unsigned short port, int connect_num, star::ip_type IP_type)
 		:close_flag(false), IP_type(IP_type), connect_num(connect_num)
 	{
 		int ret;
+		std::call_once(star::net_Initialize_flag, star::net_Initialize);
 		if (!isInitialize.load()) {
 			throw net_exception("windows net initialize fail!\n");
 		}
@@ -137,9 +139,10 @@ namespace star {
 		this->Initialize(port);
 	}
 
-	inline tcp_socket_server::tcp_socket_server(short port, int connect_num, star::ip_type IP_type)
+	tcp_socket_server::tcp_socket_server(unsigned short port, int connect_num, star::ip_type IP_type)
 		:close_flag(false), IP_type(IP_type), connect_num(connect_num)
 	{
+		std::call_once(star::net_Initialize_flag, star::net_Initialize);
 		if (!isInitialize.load()) {
 			throw net_exception("windows net initialize fail!\n");
 		}
@@ -158,7 +161,7 @@ namespace star {
 		this->Initialize(port);
 	}
 
-	inline tcp_socket tcp_socket_server::accept()
+	tcp_socket tcp_socket_server::accept()
 	{
 		tcp_socket client_socket;
 		switch (IP_type)
@@ -182,7 +185,7 @@ namespace star {
 		return client_socket;
 	}
 
-	inline unsigned short tcp_socket_server::getPort()
+	unsigned short tcp_socket_server::getPort()
 	{
 		switch (this->IP_type)
 		{
@@ -198,26 +201,26 @@ namespace star {
 		}
 	}
 
-	inline void tcp_socket_server::close()
+	void tcp_socket_server::close()
 	{
 		this->close_flag.store(true, std::memory_order_release);
 		::closesocket(this->socket_server);
 	}
 
-	inline bool tcp_socket_server::isClose()
+	bool tcp_socket_server::isClose()
 	{
 		return this->close_flag.load(std::memory_order_acquire);
 	}
 }
 #elif __linux__
 namespace star {
-	inline tcp_socket::tcp_socket()
+	tcp_socket::tcp_socket()
 		:socket_client(-1), IP_type(star::ip_type::ipv4), close_flag(false)
 	{
 		memset(&ip_address, 0, sizeof(socket_addr));
 	}
 
-	inline tcp_socket::tcp_socket(tcp_socket&& MoveSource) noexcept
+	tcp_socket::tcp_socket(tcp_socket&& MoveSource) noexcept
 		: close_flag(MoveSource.close_flag.load()), socket_client(std::move(MoveSource.socket_client)),
 		ip_address(std::move(MoveSource.ip_address)), address_len(MoveSource.address_len),
 		IP_type(MoveSource.IP_type)
@@ -226,7 +229,7 @@ namespace star {
 		MoveSource.close_flag.store(false, std::memory_order_release);
 	}
 
-	inline tcp_socket::tcp_socket(std::string ip, unsigned short port, star::ip_type IP_type)
+	tcp_socket::tcp_socket(std::string ip, unsigned short port, star::ip_type IP_type)
 		:IP_type(IP_type), close_flag(false)
 	{
 		int ret;
@@ -265,7 +268,7 @@ namespace star {
 		}
 	}
 
-	inline int tcp_socket::read(char* buffer, int len, int offset)
+	int tcp_socket::read(char* buffer, int len, int offset)
 	{
 		if (!this->close_flag.load(std::memory_order::memory_order_acquire)) {
 			int recv_len = ::recv(this->socket_client, buffer + offset, len, 0);
@@ -276,7 +279,7 @@ namespace star {
 		}
 	}
 
-	inline int tcp_socket::write(char* buffer, int len, int offset)
+	int tcp_socket::write(char* buffer, int len, int offset)
 	{
 		if (!this->close_flag.load(std::memory_order::memory_order_acquire)) {
 			int send_len = ::send(this->socket_client, buffer + offset, len, 0);
@@ -287,13 +290,13 @@ namespace star {
 		}
 	}
 
-	inline void tcp_socket::close()
+	void tcp_socket::close()
 	{
 		this->close_flag.store(true, std::memory_order::memory_order_release);
 		::close(this->socket_client);
 	}
 
-	inline void tcp_socket_server::Initialize(unsigned short port)
+	void tcp_socket_server::Initialize(unsigned short port)
 	{
 		switch (this->IP_type)
 		{
@@ -318,7 +321,7 @@ namespace star {
 		listen(this->socket_server, this->connect_num);
 	}
 
-	inline tcp_socket_server::tcp_socket_server(std::string ip, unsigned short port, int connect_num, star::ip_type IP_type)
+	tcp_socket_server::tcp_socket_server(std::string ip, unsigned short port, int connect_num, star::ip_type IP_type)
 		:close_flag(false), IP_type(IP_type), connect_num(connect_num)
 	{
 		int ret;
@@ -343,7 +346,7 @@ namespace star {
 		this->Initialize(port);
 	}
 
-	inline tcp_socket_server::tcp_socket_server(short port, int connect_num, star::ip_type IP_type)
+	tcp_socket_server::tcp_socket_server(short port, int connect_num, star::ip_type IP_type)
 		:close_flag(false), IP_type(IP_type), connect_num(connect_num)
 	{
 		switch (IP_type)
@@ -361,7 +364,7 @@ namespace star {
 		this->Initialize(port);
 	}
 
-	inline tcp_socket tcp_socket_server::accept()
+	tcp_socket tcp_socket_server::accept()
 	{
 		tcp_socket client_socket;
 		switch (IP_type)
@@ -385,7 +388,7 @@ namespace star {
 		return client_socket;
 	}
 
-	inline unsigned short tcp_socket_server::getPort()
+	unsigned short tcp_socket_server::getPort()
 	{
 		switch (this->IP_type)
 		{
@@ -401,13 +404,13 @@ namespace star {
 		}
 	}
 
-	inline void tcp_socket_server::close()
+	void tcp_socket_server::close()
 	{
 		this->close_flag.store(true, std::memory_order_release);
 		::close(this->socket_server);
 	}
 
-	inline bool tcp_socket_server::isClose()
+	bool tcp_socket_server::isClose()
 	{
 		return this->close_flag.load(std::memory_order_acquire);
 	}

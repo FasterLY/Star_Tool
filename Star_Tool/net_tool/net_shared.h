@@ -1,5 +1,6 @@
 #pragma once
 #include<atomic>
+#include<mutex>
 #include<string>
 #include<string.h>
 #include<iostream>
@@ -26,7 +27,25 @@ namespace star {
 #ifndef _WINSOCKAPI_
 #include <Winsock2.h>  
 #include<WS2tcpip.h>
+namespace star {
+	union socket_addr {
+		sockaddr_in ipv4;
+		sockaddr_in6 ipv6;
+	};
+	void net_Initialize();
+#ifndef NET_SHARED_CPP
+	extern std::once_flag net_Initialize_flag;
+	extern std::atomic<bool> isInitialize;
 #endif
-#elif  __linux__
+}
+#endif
 
+
+#elif  __linux__
+namespace star {
+	union socket_addr {
+		sockaddr_in ipv4;
+		sockaddr_in6 ipv6;
+	};
+}
 #endif // WIN32
