@@ -2,7 +2,7 @@
 #include"../interrupt_cin.h"
 namespace star {
 	void block_cin::notify() {
-		this->condition_lock.notify_all();
+		this_thread::condition_lock->notify_all();
 	}
 	istream::cin_thread::cin_thread(std::stringstream& istream_handle) :finish_flag(true), istream_handle(istream_handle) {
 		thread_handle = std::thread(&istream::cin_thread::async_task,this);

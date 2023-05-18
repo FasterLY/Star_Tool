@@ -74,6 +74,12 @@ int main() {
 	star::tcp_socket_server ser(8888);
 	star::thread th1(func);
 	th1.join();
+	try {
+		th1.try_interrepted();
+	}
+	catch (std::exception& err) {
+		cout << err.what() << endl;
+	}
 	
 
 

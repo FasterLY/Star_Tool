@@ -4,11 +4,13 @@
 #endif // !STAR_THREAD_CPP_REX
 #include<atomic>
 #include<memory>
+#include<condition_variable>
 namespace star {
 	class interrupt_except;
 	namespace this_thread {
 		thread_local std::shared_ptr<interrupt_except> interrupt_msg_ptr_local = std::make_shared<interrupt_except>();
 		thread_local std::shared_ptr<std::atomic<bool>> interrupt_ptr_local = std::make_shared<std::atomic<bool>>(false);
+		thread_local std::shared_ptr<std::condition_variable> condition_lock = std::make_shared<std::condition_variable>();
 	}
 }
 #include"../thread.h"
@@ -35,11 +37,13 @@ namespace star {
 	namespace this_thread {
 		void interrupt() {
 			interrupt_ptr_local->store(true, std::memory_order_release);
+			this_thread::condition_lock->notify_all();
 		}
 		void interrupt(std::string msg)
 		{
 			interrupt_msg_ptr_local->set_msg(msg);
 			interrupt_ptr_local->store(true,std::memory_order_release);
+			this_thread::condition_lock->notify_all();
 		}
 		void try_interrepted() noexcept(false)
 		{
@@ -47,7 +51,8 @@ namespace star {
 				throw* (interrupt_msg_ptr_local);
 			}
 		}
-		void clear()
+		
+		void star::this_thread::clear()
 		{
 			interrupt_ptr_local->store(false, std::memory_order_release);
 			interrupt_msg_ptr_local->clear();
@@ -56,12 +61,14 @@ namespace star {
 
 	void thread::interrupt() {
 		interrupt_ptr->store(true, std::memory_order_release);
+		this_thread::condition_lock->notify_all();
 	}
 
 	void thread::interrupt(std::string msg)
 	{
 		this->interrupt_msg_ptr->set_msg(msg);
 		interrupt_ptr->store(true, std::memory_order_release);
+		this_thread::condition_lock->notify_all();
 	}
 
 	void thread::try_interrepted()  noexcept(false)
@@ -70,11 +77,10 @@ namespace star {
 			throw* (this->interrupt_msg_ptr);
 		}
 	}
-
-	void thread::clear() 
+	
+	void star::thread::clear()
 	{
 		interrupt_ptr->store(false, std::memory_order_release);
 		this->interrupt_msg_ptr->clear();
 	}
-	
 }

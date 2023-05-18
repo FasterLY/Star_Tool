@@ -23,6 +23,7 @@ namespace star {
 #ifndef STAR_THREAD_CPP_REX
 		extern thread_local std::shared_ptr<interrupt_except> interrupt_msg_ptr_local;
 		extern thread_local std::shared_ptr<std::atomic<bool>> interrupt_ptr_local;
+		extern thread_local std::shared_ptr<std::condition_variable> condition_lock;
 #endif // !STAR_THREAD_CPP_REX
 		void interrupt();
 		void interrupt(std::string msg);
@@ -37,8 +38,8 @@ namespace star {
 		thread(Function&& function);
 		void interrupt();
 		void interrupt(std::string msg);
-		void clear();
 		void try_interrepted()  noexcept(false);
+		void clear();
 	private:
 		std::shared_ptr<std::atomic<bool>> interrupt_ptr;
 		std::shared_ptr<interrupt_except> interrupt_msg_ptr;
