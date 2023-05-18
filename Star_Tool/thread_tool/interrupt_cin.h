@@ -11,7 +11,6 @@ namespace star {
 	class block_cin :public std::stringstream {
 	private:
 		std::mutex locker;
-		std::condition_variable condition_lock;
 		block_cin():std::stringstream{}{}
 	public:
 		block_cin(const block_cin&) = delete;
@@ -56,7 +55,7 @@ namespace star {
 		std::call_once(block_cin::call_flag, istream::initialization);
 		if (this->rdbuf()->in_avail() <= 0) {
 			std::unique_lock lock_t(this->locker);
-			this->condition_lock.wait(lock_t, [&]() {return this->rdbuf()->in_avail() > 0 || this_thread::interrupt_ptr_local->load(); });
+			this_thread::condition_lock->wait(lock_t, [&]() {return this->rdbuf()->in_avail() > 0 || this_thread::interrupt_ptr_local->load(); });
 		}
 		std::stringstream& base = *this;
 		base >> buffer;

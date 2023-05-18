@@ -5,13 +5,13 @@ namespace star {
 	namespace safe_container {
 		namespace no_mutex {
 			/**
-			*   本节无锁队列详细代码摘自C++并行实战（第二版）内容并整理代码头部分布
+			*   本节无锁队列详细代码摘自C++并行实战（第二版）内容并整理代码头部分布并修复了部分代码
 			**/
 			template<typename T>
 			class queue
 			{
 				/*
-				* 本节无锁队列详细代码摘自C++并行实战（第二版）内容并整理代码头部分布
+				* 本节无锁队列详细代码摘自C++并行实战（第二版）内容并整理代码头部分布并修复了部分代码
 				*/
 			public:
 				queue();
