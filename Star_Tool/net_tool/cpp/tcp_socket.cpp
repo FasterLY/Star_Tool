@@ -13,7 +13,6 @@ namespace star {
 #ifdef _WIN32
 	extern std::atomic<bool> isInitialize; 
 	extern std::once_flag net_Initialize_flag;
-	extern std::atomic<bool> isInitialize;
 	extern void net_Initialize();
 #endif
 	tcp_socket::tcp_socket()
@@ -28,7 +27,7 @@ namespace star {
 		IP_type(MoveSource.IP_type)
 	{
 		MoveSource.socket_client = STAR_INVALID_SOCKET;
-		MoveSource.close_flag.store(false, std::memory_order_release);
+		MoveSource.close_flag.store(true, std::memory_order_release);
 	}
 
 	tcp_socket::tcp_socket(std::string ip, unsigned short port, star::ip_type IP_type)
@@ -99,7 +98,7 @@ namespace star {
 	}
 
 	void tcp_socket::close() {
-		if (close_flag.load(std::memory_order_acquire)) {
+		if (!close_flag.load(std::memory_order_acquire)) {
 			this->close_flag.store(true, std::memory_order::memory_order_release);
 #ifdef _WIN32
 			closesocket(this->socket_client);
@@ -237,7 +236,7 @@ namespace star {
 
 	void tcp_socket_server::close()
 	{
-		if (close_flag.load(std::memory_order_acquire)) {
+		if (!close_flag.load(std::memory_order_acquire)) {
 			this->close_flag.store(true, std::memory_order::memory_order_release);
 #ifdef _WIN32
 			closesocket(this->socket_server);

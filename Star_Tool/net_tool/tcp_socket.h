@@ -7,14 +7,16 @@ namespace star {
 	private:
 #ifdef _WIN32
 		using star_sockaddr = SOCKADDR;
+		using star_socket = SOCKET;
 #elif __linux__
 		using star_sockaddr = sockaddr;
+		using star_socket = int;
 #endif
 	private:
 		std::atomic<bool> close_flag;		//关闭flag
-		SOCKET socket_client;				//socket句柄
+		star_socket socket_client;				//socket句柄
 		socket_addr ip_address;				//socket地址信息
-		int address_len = sizeof(star_sockaddr);	//socket地址信息长度
+		socklen_t address_len = sizeof(star_sockaddr);	//socket地址信息长度
 		star::ip_type IP_type;				//socket种类
 		friend class tcp_socket_server;		//友元类
 		tcp_socket();						//保留默认构造函数给友元类tcp_socket_server使用
@@ -31,9 +33,9 @@ namespace star {
 	class tcp_socket_server {
 	private:
 		std::atomic<bool> close_flag;
-		SOCKET socket_server;
+		tcp_socket::star_socket socket_server;
 		socket_addr ip_address;
-		int address_len = sizeof(tcp_socket::star_sockaddr);
+		socklen_t address_len = sizeof(tcp_socket::star_sockaddr);
 		star::ip_type IP_type;
 		int connect_num;
 		void Initialize(unsigned short port);
