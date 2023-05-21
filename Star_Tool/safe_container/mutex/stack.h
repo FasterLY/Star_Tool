@@ -25,6 +25,8 @@ namespace star {
                 stack(const stack& other);
                 stack& operator=(const stack&) = delete;
                 void push(T new_value);
+                template<typename...Args>
+                void emplace(Args&&... args);
                 std::shared_ptr<T> pop();
                 void pop(T& value);
                 bool empty() const;
@@ -42,6 +44,14 @@ namespace star {
             {
                 std::lock_guard<std::mutex> lock(m);
                 data.push(std::move(new_value));
+            }
+
+            template<typename T>
+            template<typename...Args>
+            void stack<T>::emplace(Args&&... args)
+            {
+                std::lock_guard<std::mutex> lock(m);
+                data.emplace(args...);
             }
 
             template<typename T>

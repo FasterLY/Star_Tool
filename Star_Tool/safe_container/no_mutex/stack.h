@@ -21,6 +21,8 @@ namespace star {
 			public:
 				stack();
 				void push(T data);
+				template<typename...Args>
+				void emplace(Args&&... args);
 				void push(std::shared_ptr<T> data_ptr);
 				std::shared_ptr<T> pop();
 			};
@@ -40,6 +42,15 @@ namespace star {
 			inline void stack<T>::push(std::shared_ptr<T> data_ptr)
 			{
 				std::shared_ptr<node> new_node(std::make_shared<node>(data_ptr));
+				new_node->next = head.load();
+				while (!(head.compare_exchange_weak(new_node->next, new_node)));
+			}
+
+			template<class T>
+			template<typename ...Args>
+			inline void stack<T>::emplace(Args && ...args)
+			{
+				std::shared_ptr<node> new_node(std::make_shared<node>(std::make_shared<T>(args...)));
 				new_node->next = head.load();
 				while (!(head.compare_exchange_weak(new_node->next, new_node)));
 			}

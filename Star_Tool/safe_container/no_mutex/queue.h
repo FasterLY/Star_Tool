@@ -16,6 +16,8 @@ namespace star {
 			public:
 				queue();
 				~queue();
+				template<typename...Args>
+				void emplace(Args&&... args);
 				void push(T data);
 				std::unique_ptr<T> pop();
 			private:
@@ -43,10 +45,51 @@ namespace star {
 				delete (this->head.load()).ptr;
 			}
 
+
+			template<typename T>
+			template<typename ...Args>
+			inline void queue<T>::emplace(Args && ...args)
+			{
+				std::unique_ptr<T> new_data{std::make_unique<T>(args...)};							//数据暂存
+				counted_node_ptr new_next;															//新的引用节点
+				new_next.ptr = new node{};															//设置引用节点的新数据节点
+				new_next.external_count = 1;														//设置引用节点的引用数量
+				counted_node_ptr old_tail = tail.load();											//暂存旧的尾部引用节点
+				while (true)
+				{
+					increase_external_count(tail, old_tail);										//对尾部节点的引用加1并更新暂存尾部节点
+					T* old_data = nullptr;
+					if (old_tail.ptr->data.compare_exchange_strong(old_data, new_data.get()))		//若尾部节点数据的数据指针为空则用新数据节点替换
+					{
+						counted_node_ptr old_next{};												//创建旧的尾部引用节点的下一引用节点的暂存
+						if (!old_tail.ptr->next.compare_exchange_strong(
+							old_next, new_next))													//旧的尾部引用的数据指向下一个引用数据为空则用新的引用节点替换
+						{
+							delete new_next.ptr;													//若替换失败代表旧的尾部引用节点的下一引用节点已经被替换了
+							new_next = old_next;													//则这个新引用节点就没有意义了，删除即可。
+						}
+						set_new_tail(old_tail, new_next);											//设置更新新的尾部节点
+						new_data.release();															//取消数据节点的托管，将指针交给节点管理
+						break;
+					}
+					else
+					{
+						counted_node_ptr old_next{};
+						if (old_tail.ptr->next.compare_exchange_strong(
+							old_next, new_next))
+						{
+							old_next = new_next;
+							new_next.ptr = new node;
+						}
+						set_new_tail(old_tail, old_next);
+					}
+				}
+			}
+
 			template<typename T>
 			inline void queue<T>::push(T data)
 			{
-				std::unique_ptr<T> new_data(new T(data));											//数据暂存
+				std::unique_ptr<T> new_data{ std::make_unique<T>(data) };											//数据暂存
 				counted_node_ptr new_next;															//新的引用节点
 				new_next.ptr = new node{};															//设置引用节点的新数据节点
 				new_next.external_count = 1;														//设置引用节点的引用数量
@@ -214,6 +257,6 @@ namespace star {
 			inline queue<T>::counted_node_ptr::counted_node_ptr(int external_count, node* ptr)
 				:external_count(external_count), ptr(ptr)
 			{}
-		}
+}
 	}
 }

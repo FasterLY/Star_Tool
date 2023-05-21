@@ -10,7 +10,7 @@
 using namespace std;
 class Obj_cs {
 public:
-	Obj_cs() {
+	Obj_cs(int i) {
 		cout << "Obj_cs is created" << endl;
 		this->cs();
 	}
@@ -24,7 +24,7 @@ public:
 
 class Obj_cs2 :public Obj_cs {
 public:
-	Obj_cs2() :Obj_cs() {
+	Obj_cs2() :Obj_cs(0) {
 		cout << "Obj_cs2 is created" << endl;
 		this->cs();
 	}
@@ -51,11 +51,10 @@ namespace star {
 	extern int i;
 }
 int main() {
-	star::safe_container::no_mutex::queue<int> que;
-	que.push(10);
-	que.push(20);
-	que.push(30);
-	cout << *(que.pop()) << endl;
+	star::safe_container::no_mutex::queue<Obj_cs> que;
+	que.emplace(10);
+	que.emplace(20);
+	que.emplace(30);
 	atomic<int*> ptr{ nullptr };
 	int* pt = nullptr;
 	ptr.compare_exchange_strong(pt, new int(10));
@@ -80,7 +79,4 @@ int main() {
 	catch (std::exception& err) {
 		cout << err.what() << endl;
 	}
-	
-
-
 }
