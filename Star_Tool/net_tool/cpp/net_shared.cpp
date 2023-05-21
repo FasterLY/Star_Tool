@@ -1,7 +1,3 @@
-#ifndef NET_SHARED_CPP
-#define NET_SHARED_CPP
-#endif // !NET_SHARED_CPP
-
 #include"../net_shared.h"
 
 namespace star {

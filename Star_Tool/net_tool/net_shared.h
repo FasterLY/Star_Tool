@@ -1,4 +1,12 @@
 #pragma once
+#ifdef _WIN32							//Windows头文件
+#pragma comment(lib,"ws2_32.lib")		//链接动态库
+#ifndef _WINSOCKAPI_					//防止重复载入头文件
+#include <Winsock2.h>  
+#include<WS2tcpip.h>
+#endif
+#endif
+
 #include<atomic>
 #include<mutex>
 #include<string>
@@ -20,32 +28,8 @@ namespace star {
 		net_exception(std::string error_msg);
 		virtual const char* what() const throw() override;
 	};
-}
-
-#ifdef _WIN32
-#pragma comment(lib,"ws2_32.lib")		//链接动态库
-#ifndef _WINSOCKAPI_
-#include <Winsock2.h>  
-#include<WS2tcpip.h>
-namespace star {
-	union socket_addr {
-		sockaddr_in ipv4;
-		sockaddr_in6 ipv6;
-	};
-	void net_Initialize();
-#ifndef NET_SHARED_CPP
-	extern std::once_flag net_Initialize_flag;
-	extern std::atomic<bool> isInitialize;
-#endif
-}
-#endif
-
-
-#elif  __linux__
-namespace star {
 	union socket_addr {
 		sockaddr_in ipv4;
 		sockaddr_in6 ipv6;
 	};
 }
-#endif // WIN32

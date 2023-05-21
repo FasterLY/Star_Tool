@@ -1,6 +1,12 @@
 #include "../udp_socket.h"
 #ifdef _WIN32
 namespace star {
+#ifdef _WIN32
+	extern std::atomic<bool> isInitialize;
+	extern std::once_flag net_Initialize_flag;
+	extern std::atomic<bool> isInitialize;
+	extern void net_Initialize();
+#endif
 	udp_socket::udp_socket(udp_socket&& MoveSource) noexcept
 		: close_flag(MoveSource.close_flag.load()), socket_client(std::move(MoveSource.socket_client)),
 		ip_address(std::move(MoveSource.ip_address)), address_len(MoveSource.address_len),
