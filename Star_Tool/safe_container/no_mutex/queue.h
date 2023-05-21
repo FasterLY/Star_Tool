@@ -215,11 +215,9 @@ namespace star {
 			template<typename T>
 			inline queue<T>::counted_node_ptr::counted_node_ptr(int external_count, node* ptr)
 				:external_count(external_count), ptr(ptr)
-			{
+			{}
 
-			}
-
-}
+		}
 	}
 
 }
