@@ -58,8 +58,6 @@ namespace star {
 					if (old_tail.ptr->data.compare_exchange_strong(old_data, new_data.get()))		//若尾部节点数据的数据指针为空则用新数据节点替换
 					{
 						counted_node_ptr old_next{};												//创建旧的尾部引用节点的下一引用节点的暂存
-
-						old_tail.ptr->next.load();
 						if (!old_tail.ptr->next.compare_exchange_strong(
 							old_next, new_next))													//旧的尾部引用的数据指向下一个引用数据为空则用新的引用节点替换
 						{
