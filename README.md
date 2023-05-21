@@ -5,3 +5,10 @@ https://blog.csdn.net/qq_29322325/article/details/130715160?csdn_share_tail=%7B%
 
 目前bug（待修补）：
 （1）C++20以下无锁queue容器抛出错误问题
+
+优化目标：
+（1）完善和支持更多tcp、udp不同平台间flag标志位和不同读取模式的支持
+
+更新日志：
+日期                    更新内容
+2023年5月21日            修复了C++20以下无锁queue容器抛出错误问题，完善了udp、tcp平台代码优化和功能的完善，总结了Linux和Windows运用的差异性并进行代码缩减，优化代码长度
