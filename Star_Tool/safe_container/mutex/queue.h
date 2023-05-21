@@ -25,7 +25,7 @@ namespace star {
                 bool empty() const;
                 void push(T new_value);
                 template<typename...Args>
-                void emplace(Args... args);
+                void emplace(Args&&... args);
                 void push(std::shared_ptr<T> new_value);
             };
 
@@ -94,7 +94,7 @@ namespace star {
 
             template<typename T>
             template<typename ...Args>
-            inline void queue<T>::emplace(Args ...args)
+            inline void queue<T>::emplace(Args&&... args)
             {
                 std::shared_ptr<T> data(std::make_shared<T>(args...));
                 std::lock_guard<std::mutex> lk(mut);
