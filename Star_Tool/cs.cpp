@@ -11,6 +11,7 @@ using namespace std;
 class Obj_cs {
 public:
 	Obj_cs(int i) {
+		//memset(this, 0, sizeof(decltype(*this)));
 		cout << "Obj_cs is created" << endl;
 		this->cs();
 	}
@@ -25,6 +26,7 @@ public:
 class Obj_cs2 :public Obj_cs {
 public:
 	Obj_cs2() :Obj_cs(0) {
+		//memset(this, 0, sizeof(decltype(*this)));
 		cout << "Obj_cs2 is created" << endl;
 		this->cs();
 	}
@@ -47,36 +49,34 @@ public:
 #include"thread_tool/thread.h"
 #include"bytes_tool/byte_array.h"
 #include"safe_container/no_mutex/queue.h"
+#include"tool/get_set.h"
 namespace star {
 	extern int i;
 }
-int main() {
-	star::safe_container::no_mutex::queue<Obj_cs> que;
-	que.emplace(10);
-	que.emplace(20);
-	que.emplace(30);
-	atomic<int*> ptr{ nullptr };
-	int* pt = nullptr;
-	ptr.compare_exchange_strong(pt, new int(10));
 
-	star::byte_builder build{};
-	build.pusb_back("abcdefghij", 10);
-	auto func = []() {
-		star::this_thread::interrupt("interrupt ok!");
-		try {
-			star::this_thread::try_interrepted();
-		}
-		catch (std::exception& err) {
-			cout << err.what() << endl;
-		}
+class MyClass
+{
+public:
+	MyClass() :buf { 0 }
+	{}
+	~MyClass() = default;
+	star::get_set<int> Buf{ 
+		//data:
+		this->buf,
+		//getter:
+		[](int i) {
+			return i;
+		},
+		//setter:
+		[](int i) {
+			return i > 99 ? 99 : i;
+		} 
 	};
-	star::tcp_socket_server ser(8888);
-	star::thread th1(func);
-	th1.join();
-	try {
-		th1.try_interrepted();
-	}
-	catch (std::exception& err) {
-		cout << err.what() << endl;
-	}
+private:
+	int buf;
+};
+
+int main() {
+	int i;
+	star::get_set<int> I(i);
 }
