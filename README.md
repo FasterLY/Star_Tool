@@ -12,3 +12,5 @@ https://blog.csdn.net/qq_29322325/article/details/130715160?csdn_share_tail=%7B%
 更新日志：
 日期                    更新内容
 2023年5月21日            修复了C++20以下无锁queue容器抛出错误问题，完善了udp、tcp平台代码优化和功能的完善，总结了Linux和Windows运用的差异性并进行代码缩减，优化代码长度
+2022年5月22日            为无锁容器和有锁容器queue和stack添加了原位构造方法emplace，修复和完善了无锁容器queue的内存泄漏问题，增强了其代码的线程安全性。
+
