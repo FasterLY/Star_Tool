@@ -9,6 +9,29 @@ namespace star {
 				/*
 				*当前无锁栈容器是否无锁取决于标准库内shared_ptr是否是无锁实现。
 				*/
+			
+			public:
+				/*
+				* 默认初始化一个空栈
+				*/
+				stack();
+				/*
+				* 将数据以复制的方式推入栈中
+				*/
+				void push(T data);
+				/*
+				* 在栈顶进行原位构造，根据输入参数调用数据的构造函数进行构造在栈顶
+				*/
+				template<typename...Args>
+				void emplace(Args&&... args);
+				/*
+				* 将指向数据的指针推入栈顶（优点：防止过多冗余构造）
+				*/
+				void push(std::shared_ptr<T> data_ptr);
+				/*
+				* 返回栈顶元素的指针并且将栈顶元素弹出
+				*/
+				std::shared_ptr<T> pop();
 			private:
 				struct node {
 					std::shared_ptr<T> data;
@@ -18,13 +41,6 @@ namespace star {
 					node(std::shared_ptr<T> Data_ptr) :data(Data_ptr), next(nullptr) {}
 				};
 				std::atomic<std::shared_ptr<node>> head;
-			public:
-				stack();
-				void push(T data);
-				template<typename...Args>
-				void emplace(Args&&... args);
-				void push(std::shared_ptr<T> data_ptr);
-				std::shared_ptr<T> pop();
 			};
 
 			template<class T>
