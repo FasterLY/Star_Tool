@@ -136,7 +136,6 @@
     <ClInclude Include="constructor\serialize.h" />
     <ClInclude Include="constructor\dictionary.h" />
     <ClInclude Include="net_tool\net_shared.h" />
-    <ClInclude Include="thread_tool\cpp\thread_pool.cpp" />
     <ClInclude Include="thread_tool\interrupt_cin.h" />
     <ClInclude Include="tool\array.h" />
     <ClInclude Include="bytes_tool\byte_array.h" />
@@ -164,6 +163,7 @@
     <ClCompile Include="net_tool\cpp\udp_socket.cpp" />
     <ClCompile Include="thread_tool\cpp\interrupt_cin.cpp" />
     <ClCompile Include="thread_tool\cpp\thread.cpp" />
+    <ClCompile Include="thread_tool\cpp\thread_pool.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

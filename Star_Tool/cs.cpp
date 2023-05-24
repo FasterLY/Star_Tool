@@ -75,8 +75,9 @@ public:
 private:
 	int buf;
 };
-
+#include"thread_tool/thread_pool.h"
 int main() {
-	int i;
-	star::get_set<int> I(i);
+	star::thread_pool pool(10);
+	pool.reserver(15);
+	pool.reserver(10);
 }
