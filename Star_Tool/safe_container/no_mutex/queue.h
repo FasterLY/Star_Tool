@@ -14,11 +14,32 @@ namespace star {
 				* 本节无锁队列详细代码摘自C++并行实战（第二版）内容并整理代码头部分布并修复了部分代码
 				*/
 			public:
+				/*
+				* 默认构造函数，构造一个空的无锁线程安全队列
+				*/
 				queue();
+				/*
+				* 析构函数，完成对资源的回收
+				*/
 				~queue();
+				/*
+				* 原位构造函数，直接对队列的队尾的存储数据进行传入并构造
+				*/
 				template<typename...Args>
 				void emplace(Args&&... args);
+				/*
+				* 将数据以拷贝的方式压入队尾
+				* data:数据
+				*/
 				void push(T data);
+				/*
+				* data:指向数据的指针，注意，必须使用move进行右值传入
+				* 将数据以智能指针的方式压入队尾（优点：省去冗余的构造方法）
+				*/
+				void push(std::unique_ptr<T>&& data_ptr);
+				/*
+				* 将数据从队首取出，若队列为空则取出的为nullptr空指针，否则为指向数据的数据指针unique_ptr
+				*/
 				std::unique_ptr<T> pop();
 			private:
 				struct node;
@@ -90,15 +111,21 @@ namespace star {
 			inline void queue<T>::push(T data)
 			{
 				std::unique_ptr<T> new_data{ std::make_unique<T>(data) };											//数据暂存
+				this->push(std::move(new_data));
+			}
+
+			template<typename T>
+			inline void queue<T>::push(std::unique_ptr<T>&& data_ptr)
+			{
 				counted_node_ptr new_next;															//新的引用节点
 				new_next.ptr = new node{};															//设置引用节点的新数据节点
 				new_next.external_count = 1;														//设置引用节点的引用数量
 				counted_node_ptr old_tail = tail.load();											//暂存旧的尾部引用节点
-				while(true)															
-				{								
+				while (true)
+				{
 					increase_external_count(tail, old_tail);										//对尾部节点的引用加1并更新暂存尾部节点
 					T* old_data = nullptr;
-					if (old_tail.ptr->data.compare_exchange_strong(old_data, new_data.get()))		//若尾部节点数据的数据指针为空则用新数据节点替换
+					if (old_tail.ptr->data.compare_exchange_strong(old_data, data_ptr.get()))		//若尾部节点数据的数据指针为空则用新数据节点替换
 					{
 						counted_node_ptr old_next{};												//创建旧的尾部引用节点的下一引用节点的暂存
 						if (!old_tail.ptr->next.compare_exchange_strong(
@@ -108,7 +135,7 @@ namespace star {
 							new_next = old_next;													//则这个新引用节点就没有意义了，删除即可。
 						}
 						set_new_tail(old_tail, new_next);											//设置更新新的尾部节点
-						new_data.release();															//取消数据节点的托管，将指针交给节点管理
+						data_ptr.release();															//取消数据节点的托管，将指针交给节点管理
 						break;
 					}
 					else
