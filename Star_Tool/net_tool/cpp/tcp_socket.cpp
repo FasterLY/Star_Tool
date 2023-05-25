@@ -5,7 +5,7 @@
 #define STAR_IN6ADDR_ANY in6addr_any
 #elif __linux__
 #define STAR_INVALID_SOCKET -1
-#define STAR_IN4ADDR_ANY INADDR_ANY
+#define STAR_IN4ADDR_ANY htonl(INADDR_ANY)
 #define STAR_IN6ADDR_ANY IN6ADDR_ANY_INIT
 #endif // WIN32
 
@@ -182,7 +182,12 @@ namespace star {
 		switch (IP_type)
 		{
 		case star::ip_type::ipv4:
+#ifdef _WIN32
 			ip_address.ipv4.sin_addr = STAR_IN4ADDR_ANY;
+#elif __linux__
+			ip_address.ipv4.sin_addr.s_addr = STAR_IN4ADDR_ANY;
+#endif // _WIN32
+
 			break;
 		case star::ip_type::ipv6:
 			ip_address.ipv6.sin6_addr = STAR_IN6ADDR_ANY;

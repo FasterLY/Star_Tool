@@ -5,8 +5,12 @@
 #include <Winsock2.h>  
 #include<WS2tcpip.h>
 #endif
+#elif __linux__
+#include<sys/socket.h>
+#include<arpa/inet.h>
+#include<unistd.h>
 #endif
-
+#include<memory>
 #include<atomic>
 #include<mutex>
 #include<string>
