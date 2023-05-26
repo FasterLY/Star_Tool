@@ -12,6 +12,7 @@ namespace star {
 	private:
 		std::mutex locker;
 		block_cin():std::stringstream{}{}
+		std::shared_ptr<std::condition_variable> condition_lock;
 	public:
 		block_cin(const block_cin&) = delete;
 		block_cin(block_cin&&) = delete;
@@ -42,23 +43,20 @@ namespace star {
 		istream(istream&&) = delete;
 	};
 
-	std::once_flag block_cin::call_flag{};
-	block_cin block_cin::cin{};
-	block_cin& cin{ block_cin::cin };
-	std::shared_ptr<istream::cin_thread> istream::handle{nullptr};
-
-	
+	extern block_cin& cin;
 
 	template<typename T>
 	inline block_cin& block_cin::operator>>(T& buffer)
 	{
 		std::call_once(block_cin::call_flag, istream::initialization);
-		if (this->rdbuf()->in_avail() <= 0) {
+		if (this->str().length() - this->tellg() <= 0) {
 			std::unique_lock lock_t(this->locker);
-			this_thread::condition_lock->wait(lock_t, [&]() {return this->rdbuf()->in_avail() > 0 || this_thread::interrupt_ptr_local->load(); });
+			condition_lock = this_thread::condition_lock;
+			block_cin& block_this{ *this };
+			this->condition_lock->wait(lock_t, [&]() {return block_this.str().length() - block_this.tellg() > 0 || this_thread::interrupt_ptr_local->load(); });
 		}
-		std::stringstream& base = *this;
-		base >> buffer;
+		std::stringstream::operator>>(buffer);
+		this->ignore();
 		return *this;
 	}
 }

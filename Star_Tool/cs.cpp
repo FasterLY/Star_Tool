@@ -76,8 +76,20 @@ private:
 	int buf;
 };
 #include"thread_tool/thread_pool.h"
+#include"thread_tool/thread.h"
+#include"thread_tool/interrupt_cin.h"
 int main() {
 	star::thread_pool pool(10);
 	pool.reserver(15);
 	pool.reserver(10);
+	cout << (2 << 1);
+	int i;
+	star::cin >> i;
+	cout << i;
+	cout << star::cin.tellg();
+	star::cin >> i;
+	cout << i;
+	star::cin >> i;
+	cout << i;
+
 }
