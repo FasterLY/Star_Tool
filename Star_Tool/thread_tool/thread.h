@@ -35,6 +35,7 @@ namespace star {
 #ifndef STAR_THREAD_CPP_REX
 		extern thread_local std::shared_ptr<interrupt_except> interrupt_msg_ptr_local;
 		extern thread_local std::shared_ptr<std::atomic<bool>> interrupt_ptr_local;
+		extern thread_local std::shared_ptr<std::condition_variable> condition_lock;
 #endif // !STAR_THREAD_CPP_REX
 		/*
 		* 在当前线程发送中断消息
