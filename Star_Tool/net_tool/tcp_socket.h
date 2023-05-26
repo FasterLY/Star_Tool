@@ -14,7 +14,7 @@ namespace star {
 #endif
 	private:
 		std::atomic<bool> close_flag;		//关闭flag
-		star_socket socket_client;				//socket句柄
+		star_socket star_socket_handle;			//socket句柄
 		socket_addr ip_address;				//socket地址信息
 		socklen_t address_len = sizeof(star_sockaddr);	//socket地址信息长度
 		star::ip_type IP_type;				//socket种类
@@ -33,7 +33,7 @@ namespace star {
 	class tcp_socket_server {
 	private:
 		std::atomic<bool> close_flag;
-		tcp_socket::star_socket socket_server;
+		tcp_socket::star_socket star_socket_handle;
 		socket_addr ip_address;
 		socklen_t address_len = sizeof(tcp_socket::star_sockaddr);
 		star::ip_type IP_type;
