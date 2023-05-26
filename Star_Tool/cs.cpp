@@ -86,7 +86,6 @@ int main() {
 	int i;
 	star::cin >> i;
 	cout << i;
-	cout << star::cin.tellg();
 	star::cin >> i;
 	cout << i;
 	star::cin >> i;
