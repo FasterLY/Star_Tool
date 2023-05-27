@@ -46,6 +46,11 @@ namespace star {
 		MoveSource.connect_flag.store(false, std::memory_order_release);
 	}
 
+	udp_socket::~udp_socket()
+	{
+		this->close();
+	}
+
 	star::udp_socket::udp_socket(std::string ip, unsigned short port, star::ip_type IP_type)
 		:close_flag(false), IP_type(IP_type), connect_flag(true)
 	{
@@ -224,6 +229,10 @@ namespace star {
 		}
 		this->Initialize(port);
 	}
+	udp_socket_server::~udp_socket_server()
+	{
+		this->close();
+	}
 	unsigned short udp_socket_server::getPort()
 	{
 		switch (this->IP_type)
@@ -253,13 +262,15 @@ namespace star {
 	}
 	void udp_socket_server::close()
 	{
-		this->close_flag.store(true, std::memory_order_release);
+		if (!this->close_flag.load(std::memory_order_acquire)) {
+			this->close_flag.store(true, std::memory_order_release);
 #ifdef _WIN32
-		::closesocket(this->star_socket_handle);
+			::closesocket(this->star_socket_handle);
 #elif __linux__
-		::close(this->star_socket_handle);
+			::close(this->star_socket_handle);
 #endif // _WIN32
-		this->star_socket_handle = STAR_INVALID_SOCKET;
+			this->star_socket_handle = STAR_INVALID_SOCKET;
+		}
 	}
 	bool udp_socket_server::isClose()
 	{

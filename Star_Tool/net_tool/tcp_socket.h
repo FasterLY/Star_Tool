@@ -25,6 +25,7 @@ namespace star {
 		tcp_socket(tcp_socket&& MoveSource) noexcept;	//移动构造函数
 		tcp_socket(const tcp_socket&) = delete;			//删除默认拷贝函数
 		tcp_socket(std::string ip, unsigned short port, star::ip_type IP_type = star::ip_type::ipv4);
+		~tcp_socket();
 		int read(char* buffer, int len, int offset = 0);
 		int write(char* buffer, int len, int offset = 0);
 		bool setblock(bool block);
@@ -49,6 +50,7 @@ namespace star {
 			star::ip_type IP_type = star::ip_type::ipv4);
 		tcp_socket_server(unsigned short port, int connect_num = SOMAXCONN,
 			star::ip_type IP_type = star::ip_type::ipv4);
+		~tcp_socket_server();
 		tcp_socket accept();
 		unsigned short getPort();
 		void close();

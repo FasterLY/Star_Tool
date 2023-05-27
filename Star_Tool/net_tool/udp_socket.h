@@ -36,6 +36,7 @@ namespace star {
 		udp_socket() = delete;									//删除默认构造函数
 		udp_socket(star::ip_type IP_type);						//无连接状态的udp套接字。
 		udp_socket(udp_socket&& MoveSource) noexcept;			//移动构造函数
+		~udp_socket();
 		udp_socket(const udp_socket&) = delete;					//删除默认拷贝函数
 		udp_socket(std::string ip, unsigned short port, star::ip_type IP_type = star::ip_type::ipv4);	//创建有连接状态udp套接字
 		int readfrom(socket_addr_container& address_buffer, char* buffer, int len, int offset = 0);
@@ -61,6 +62,7 @@ namespace star {
 			star::ip_type IP_type = star::ip_type::ipv4);
 		udp_socket_server(short port, int connect_num = SOMAXCONN,
 			star::ip_type IP_type = star::ip_type::ipv4);
+		~udp_socket_server();
 		unsigned short getPort();
 		/*
 		* 服务端仅有两个读写方法且不保留连接状态，服务端应该根据返回的地址写回响应数据

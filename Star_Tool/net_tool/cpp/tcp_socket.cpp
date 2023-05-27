@@ -77,6 +77,11 @@ namespace star {
 		}
 	}
 
+	tcp_socket::~tcp_socket()
+	{
+		this->close();
+	}
+
 	int tcp_socket::read(char* buffer, int len, int offset) {
 		if (!this->close_flag.load(std::memory_order::memory_order_acquire)) {
 			int recv_len = ::recv(this->star_socket_handle, buffer + offset, len, 0);
@@ -132,7 +137,7 @@ namespace star {
 				return false;
 			}
 #endif // WIN32
-	}
+		}
 		return true;
 	}
 
@@ -143,7 +148,7 @@ namespace star {
 
 	int tcp_socket::availavle()
 	{
-		unsigned long availavle;
+		unsigned long availavle = 0;
 		if (
 #ifdef _WIN32
 			::ioctlsocket(this->star_socket_handle, FIONREAD, &availavle)
@@ -257,6 +262,11 @@ namespace star {
 			break;
 		}
 		this->Initialize(port);
+	}
+
+	tcp_socket_server::~tcp_socket_server()
+	{
+		this->close();
 	}
 
 	tcp_socket tcp_socket_server::accept()
