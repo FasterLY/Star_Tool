@@ -26,6 +26,7 @@ namespace star {
 		tcp_socket(std::string ip, unsigned short port, star::ip_type IP_type = star::ip_type::ipv4);
 		int read(char* buffer, int len, int offset = 0);
 		int write(char* buffer, int len, int offset = 0);
+		int availavle();
 		void close();
 		bool isClose();
 	};

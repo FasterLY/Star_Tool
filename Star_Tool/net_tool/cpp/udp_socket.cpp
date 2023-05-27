@@ -95,13 +95,13 @@ namespace star {
 	int udp_socket::readfrom(socket_addr_container& address_buffer, char* buffer, int len, int offset)
 	{
 		int ret = -1;
-		ret = ::recvfrom(this->socket_client, buffer + offset, len, 0, (SOCKADDR*)&(address_buffer.ip_address), &(address_buffer.addr_len));
+		ret = ::recvfrom(this->socket_client, buffer + offset, len, 0, (star_sockaddr*)&(address_buffer.ip_address), &(address_buffer.addr_len));
 		return ret;
 	}
 	int udp_socket::writefor(socket_addr_container& destination, char* buffer, int len, int offset)
 	{
 		int ret = -1;
-		ret = ::sendto(this->socket_client, buffer + offset, len, 0, (SOCKADDR*)&(destination.ip_address), destination.addr_len);
+		ret = ::sendto(this->socket_client, buffer + offset, len, 0, (star_sockaddr*)&(destination.ip_address), destination.addr_len);
 		return ret;
 	}
 	int udp_socket::read(char* buffer, int len, int offset)
@@ -154,14 +154,14 @@ namespace star {
 			ip_address.ipv4.sin_port = htons(port);
 			this->socket_server = socket(AF_INET, SOCK_DGRAM, 0);
 			this->address_len = sizeof(sockaddr_in);
-			bind(this->socket_server, (SOCKADDR*)&(this->ip_address.ipv4), address_len);
+			bind(this->socket_server, (udp_socket::star_sockaddr*)&(this->ip_address.ipv4), address_len);
 			break;
 		case star::ip_type::ipv6:
 			ip_address.ipv6.sin6_family = AF_INET6;
 			ip_address.ipv6.sin6_port = htons(port);
 			this->socket_server = socket(AF_INET6, SOCK_DGRAM, 0);
 			this->address_len = sizeof(sockaddr_in6);
-			bind(this->socket_server, (SOCKADDR*)&(this->ip_address.ipv6), address_len);
+			bind(this->socket_server, (udp_socket::star_sockaddr*)&(this->ip_address.ipv6), address_len);
 			break;
 		default:
 			throw net_exception("undefined ip type!\n");
@@ -239,7 +239,7 @@ namespace star {
 	std::pair<int, socket_addr_container> udp_socket_server::read(char* buffer, int len, int offset)
 	{
 		socket_addr_container source{};
-		int ret = ::recvfrom(this->socket_server, buffer + offset, len, 0, (SOCKADDR*)&(source.ip_address), &(source.addr_len));
+		int ret = ::recvfrom(this->socket_server, buffer + offset, len, 0, (udp_socket::star_sockaddr*)&(source.ip_address), &(source.addr_len));
 		return std::pair<int, socket_addr_container>(ret, std::move(source));
 	}
 	int udp_socket_server::write(socket_addr_container& destination, char* buffer, int len, int offset)

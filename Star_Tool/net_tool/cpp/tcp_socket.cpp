@@ -97,6 +97,22 @@ namespace star {
 		}
 	}
 
+	int tcp_socket::availavle()
+	{
+#ifdef _WIN32
+		unsigned long availavle;
+		if (::ioctlsocket(this->star_socket_handle, FIONREAD, &availavle)) {
+			return availavle;
+		}
+		else {
+			return -1;
+		}
+#elif __linux__
+
+#endif // _WIN32
+		return 0;
+	}
+
 	void tcp_socket::close() {
 		if (!close_flag.load(std::memory_order_acquire)) {
 			this->close_flag.store(true, std::memory_order::memory_order_release);
