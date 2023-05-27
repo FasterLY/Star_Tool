@@ -79,16 +79,11 @@ private:
 #include"thread_tool/thread.h"
 #include"thread_tool/interrupt_cin.h"
 int main() {
-	star::thread_pool pool(10);
-	pool.reserver(15);
-	pool.reserver(10);
-	cout << (2 << 1);
-	int i;
-	star::cin >> i;
-	cout << i;
-	star::cin >> i;
-	cout << i;
-	star::cin >> i;
-	cout << i;
-
+	char msg[] = "hello linux";
+	star::tcp_socket_server server_socket(8888);
+	star::tcp_socket client_socket = server_socket.accept();
+	char buffer[1024];
+	client_socket.read(buffer, 1024);
+	cout << buffer;
+	client_socket.write(msg, sizeof(msg));
 }
