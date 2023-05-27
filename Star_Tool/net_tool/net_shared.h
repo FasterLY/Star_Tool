@@ -7,6 +7,8 @@
 #endif
 #elif __linux__
 #include<sys/socket.h>
+#include<sys/ioctl.h>
+#include<fcntl.h>
 #include<arpa/inet.h>
 #include<unistd.h>
 #endif

@@ -16,7 +16,7 @@ namespace star {
 	extern void net_Initialize();
 #endif
 	tcp_socket::tcp_socket()
-		:star_socket_handle(STAR_INVALID_SOCKET), IP_type(star::ip_type::ipv4), close_flag(false)
+		:star_socket_handle(STAR_INVALID_SOCKET), IP_type(star::ip_type::ipv4), close_flag(false), block_flag(true)
 	{
 		memset(&ip_address, 0, sizeof(socket_addr));
 	}
@@ -24,14 +24,14 @@ namespace star {
 	tcp_socket::tcp_socket(tcp_socket&& MoveSource) noexcept
 		: close_flag(MoveSource.close_flag.load()), star_socket_handle(std::move(MoveSource.star_socket_handle)),
 		ip_address(std::move(MoveSource.ip_address)), address_len(MoveSource.address_len),
-		IP_type(MoveSource.IP_type)
+		IP_type(MoveSource.IP_type), block_flag(MoveSource.block_flag.load())
 	{
 		MoveSource.star_socket_handle = STAR_INVALID_SOCKET;
 		MoveSource.close_flag.store(true, std::memory_order_release);
 	}
 
 	tcp_socket::tcp_socket(std::string ip, unsigned short port, star::ip_type IP_type)
-		:close_flag(false), IP_type(IP_type)
+		:close_flag(false), IP_type(IP_type), block_flag(true)
 	{
 #ifdef _WIN32
 		std::call_once(star::net_Initialize_flag, star::net_Initialize);
@@ -97,20 +97,65 @@ namespace star {
 		}
 	}
 
+	bool tcp_socket::setblock(bool block)
+	{
+		if (this->block_flag.load() && !block) {		//ÉèÖÃ·Ç×èÈû
+#ifdef WIN32
+			u_long argp = 1;
+			if (ioctlsocket(this->star_socket_handle, FIONBIO, &argp) != 0) {
+				return false;
+			}
+#elif __linux
+			int flags = fcntl(this->star_socket_handle, F_GETFL, 0);
+			if (flags < 0) {
+				return false;
+			}
+			flags |= O_NONBLOCK;
+			if (fcntl(this->star_socket_handle, F_SETFL, flags) < 0) {
+				return false;
+			}
+#endif // WIN32
+		}
+		else if (!this->block_flag.load() && block) {	//ÉèÖÃ×èÈû
+#ifdef WIN32
+			u_long argp = 0;
+			if (ioctlsocket(this->star_socket_handle, FIONBIO, &argp) != 0) {
+				return false;
+			}
+#elif __linux
+			int flags = fcntl(this->star_socket_handle, F_GETFL, 0);
+			if (flags < 0) {
+				return false;
+			}
+			flags &= ~O_NONBLOCK;
+			if (fcntl(this->star_socket_handle, F_SETFL, flags) < 0) {
+				return false;
+			}
+#endif // WIN32
+	}
+		return true;
+	}
+
+	bool tcp_socket::isblock()
+	{
+		return this->block_flag.load(std::memory_order_acquire);
+	}
+
 	int tcp_socket::availavle()
 	{
-#ifdef _WIN32
 		unsigned long availavle;
-		if (::ioctlsocket(this->star_socket_handle, FIONREAD, &availavle)) {
+		if (
+#ifdef _WIN32
+			::ioctlsocket(this->star_socket_handle, FIONREAD, &availavle)
+#elif __linux__
+			::ioctl(this->star_socket_handle, FIONREAD, &availavle)
+#endif // _WIN32
+			) {
 			return availavle;
 		}
 		else {
 			return -1;
 		}
-#elif __linux__
-
-#endif // _WIN32
-		return 0;
 	}
 
 	void tcp_socket::close() {
@@ -203,7 +248,6 @@ namespace star {
 #elif __linux__
 			ip_address.ipv4.sin_addr.s_addr = STAR_IN4ADDR_ANY;
 #endif // _WIN32
-
 			break;
 		case star::ip_type::ipv6:
 			ip_address.ipv6.sin6_addr = STAR_IN6ADDR_ANY;

@@ -26,10 +26,10 @@ namespace star {
 		switch (IP_type)
 		{
 		case star::ip_type::ipv4:
-			this->socket_client = socket(AF_INET, SOCK_DGRAM, 0);
+			this->star_socket_handle = socket(AF_INET, SOCK_DGRAM, 0);
 			break;
 		case star::ip_type::ipv6:
-			this->socket_client = socket(AF_INET6, SOCK_DGRAM, 0);
+			this->star_socket_handle = socket(AF_INET6, SOCK_DGRAM, 0);
 			break;
 		default:
 			throw net_exception("undefined ip type!\n");
@@ -37,11 +37,11 @@ namespace star {
 		}
 	}
 	udp_socket::udp_socket(udp_socket&& MoveSource) noexcept
-		: close_flag(MoveSource.close_flag.load(std::memory_order_acquire)), socket_client(std::move(MoveSource.socket_client)),
+		: close_flag(MoveSource.close_flag.load(std::memory_order_acquire)), star_socket_handle(std::move(MoveSource.star_socket_handle)),
 		ip_address(std::move(MoveSource.ip_address)), address_len(MoveSource.address_len),
 		IP_type(MoveSource.IP_type), connect_flag(MoveSource.connect_flag.load(std::memory_order_acquire))
 	{
-		MoveSource.socket_client = STAR_INVALID_SOCKET;
+		MoveSource.star_socket_handle = STAR_INVALID_SOCKET;
 		MoveSource.close_flag.store(true, std::memory_order_release);
 		MoveSource.connect_flag.store(false, std::memory_order_release);
 	}
@@ -66,9 +66,9 @@ namespace star {
 			}
 			ip_address->ipv4.sin_family = AF_INET;
 			ip_address->ipv4.sin_port = htons(port);
-			this->socket_client = socket(AF_INET, SOCK_DGRAM, 0);
+			this->star_socket_handle = socket(AF_INET, SOCK_DGRAM, 0);
 			this->address_len = sizeof(sockaddr_in);
-			ret = connect(this->socket_client, (star_sockaddr*)&(this->ip_address->ipv4), address_len);
+			ret = connect(this->star_socket_handle, (star_sockaddr*)&(this->ip_address->ipv4), address_len);
 			if (ret != 0) {
 				this->close();
 			}
@@ -80,9 +80,9 @@ namespace star {
 			}
 			ip_address->ipv6.sin6_family = AF_INET6;
 			ip_address->ipv6.sin6_port = htons(port);
-			this->socket_client = socket(AF_INET6, SOCK_DGRAM, 0);
+			this->star_socket_handle = socket(AF_INET6, SOCK_DGRAM, 0);
 			this->address_len = sizeof(sockaddr_in6);
-			ret = connect(this->socket_client, (star_sockaddr*)&(this->ip_address->ipv6), address_len);
+			ret = connect(this->star_socket_handle, (star_sockaddr*)&(this->ip_address->ipv6), address_len);
 			if (ret != 0) {
 				this->close();
 			}
@@ -95,19 +95,19 @@ namespace star {
 	int udp_socket::readfrom(socket_addr_container& address_buffer, char* buffer, int len, int offset)
 	{
 		int ret = -1;
-		ret = ::recvfrom(this->socket_client, buffer + offset, len, 0, (star_sockaddr*)&(address_buffer.ip_address), &(address_buffer.addr_len));
+		ret = ::recvfrom(this->star_socket_handle, buffer + offset, len, 0, (star_sockaddr*)&(address_buffer.ip_address), &(address_buffer.addr_len));
 		return ret;
 	}
 	int udp_socket::writefor(socket_addr_container& destination, char* buffer, int len, int offset)
 	{
 		int ret = -1;
-		ret = ::sendto(this->socket_client, buffer + offset, len, 0, (star_sockaddr*)&(destination.ip_address), destination.addr_len);
+		ret = ::sendto(this->star_socket_handle, buffer + offset, len, 0, (star_sockaddr*)&(destination.ip_address), destination.addr_len);
 		return ret;
 	}
 	int udp_socket::read(char* buffer, int len, int offset)
 	{
 		if (this->connect_flag.load(std::memory_order_acquire)) {
-			int ret = ::recv(this->socket_client, buffer + offset, len, 0);
+			int ret = ::recv(this->star_socket_handle, buffer + offset, len, 0);
 			return ret;
 		}
 		else {
@@ -117,7 +117,7 @@ namespace star {
 	int udp_socket::write(char* buffer, int len, int offset)
 	{
 		if (this->connect_flag.load(std::memory_order_acquire)) {
-			int ret = ::send(this->socket_client, buffer + offset, len, 0);
+			int ret = ::send(this->star_socket_handle, buffer + offset, len, 0);
 			return ret;
 		}
 		else {
@@ -129,11 +129,11 @@ namespace star {
 		if (!close_flag.load(std::memory_order_acquire)) {
 			this->close_flag.store(true, std::memory_order::memory_order_release);
 #ifdef _WIN32
-			closesocket(this->socket_client);
+			closesocket(this->star_socket_handle);
 #elif __linux__
-			::close(this->socket_client);
+			::close(this->star_socket_handle);
 #endif
-			this->socket_client = STAR_INVALID_SOCKET;
+			this->star_socket_handle = STAR_INVALID_SOCKET;
 		}
 	}
 	bool udp_socket::isClose()
@@ -152,16 +152,16 @@ namespace star {
 		case star::ip_type::ipv4:
 			ip_address.ipv4.sin_family = AF_INET;
 			ip_address.ipv4.sin_port = htons(port);
-			this->socket_server = socket(AF_INET, SOCK_DGRAM, 0);
+			this->star_socket_handle = socket(AF_INET, SOCK_DGRAM, 0);
 			this->address_len = sizeof(sockaddr_in);
-			bind(this->socket_server, (udp_socket::star_sockaddr*)&(this->ip_address.ipv4), address_len);
+			bind(this->star_socket_handle, (udp_socket::star_sockaddr*)&(this->ip_address.ipv4), address_len);
 			break;
 		case star::ip_type::ipv6:
 			ip_address.ipv6.sin6_family = AF_INET6;
 			ip_address.ipv6.sin6_port = htons(port);
-			this->socket_server = socket(AF_INET6, SOCK_DGRAM, 0);
+			this->star_socket_handle = socket(AF_INET6, SOCK_DGRAM, 0);
 			this->address_len = sizeof(sockaddr_in6);
-			bind(this->socket_server, (udp_socket::star_sockaddr*)&(this->ip_address.ipv6), address_len);
+			bind(this->star_socket_handle, (udp_socket::star_sockaddr*)&(this->ip_address.ipv6), address_len);
 			break;
 		default:
 			throw net_exception("undefined ip type!\n");
@@ -206,11 +206,14 @@ namespace star {
 			throw net_exception("windows net initialize fail!\n");
 		}
 #endif // _WIN32
-		int ret;
 		switch (IP_type)
 		{
 		case star::ip_type::ipv4:
+#ifdef _WIN32
 			ip_address.ipv4.sin_addr = STAR_IN4ADDR_ANY;
+#elif __linux__
+			ip_address.ipv4.sin_addr.s_addr = STAR_IN4ADDR_ANY;
+#endif // _WIN32
 			break;
 		case star::ip_type::ipv6:
 			ip_address.ipv6.sin6_addr = STAR_IN6ADDR_ANY;
@@ -239,19 +242,24 @@ namespace star {
 	std::pair<int, socket_addr_container> udp_socket_server::read(char* buffer, int len, int offset)
 	{
 		socket_addr_container source{};
-		int ret = ::recvfrom(this->socket_server, buffer + offset, len, 0, (udp_socket::star_sockaddr*)&(source.ip_address), &(source.addr_len));
+		int ret = ::recvfrom(this->star_socket_handle, buffer + offset, len, 0, (udp_socket::star_sockaddr*)&(source.ip_address), &(source.addr_len));
 		return std::pair<int, socket_addr_container>(ret, std::move(source));
 	}
 	int udp_socket_server::write(socket_addr_container& destination, char* buffer, int len, int offset)
 	{
 		socket_addr_container source{};
-		int ret = ::sendto(this->socket_server, buffer + offset, len, 0, (udp_socket::star_sockaddr*)&(destination.ip_address), destination.addr_len);
+		int ret = ::sendto(this->star_socket_handle, buffer + offset, len, 0, (udp_socket::star_sockaddr*)&(destination.ip_address), destination.addr_len);
 		return ret;
 	}
 	void udp_socket_server::close()
 	{
 		this->close_flag.store(true, std::memory_order_release);
-		::closesocket(this->socket_server);
+#ifdef _WIN32
+		::closesocket(this->star_socket_handle);
+#elif __linux__
+		::close(this->star_socket_handle);
+#endif // _WIN32
+		this->star_socket_handle = STAR_INVALID_SOCKET;
 	}
 	bool udp_socket_server::isClose()
 	{

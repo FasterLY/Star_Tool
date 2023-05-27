@@ -14,7 +14,8 @@ namespace star {
 #endif
 	private:
 		std::atomic<bool> close_flag;		//关闭flag
-		star_socket star_socket_handle;			//socket句柄
+		std::atomic<bool> block_flag;		//阻塞标志位
+		star_socket star_socket_handle;		//socket句柄
 		socket_addr ip_address;				//socket地址信息
 		socklen_t address_len = sizeof(star_sockaddr);	//socket地址信息长度
 		star::ip_type IP_type;				//socket种类
@@ -26,6 +27,8 @@ namespace star {
 		tcp_socket(std::string ip, unsigned short port, star::ip_type IP_type = star::ip_type::ipv4);
 		int read(char* buffer, int len, int offset = 0);
 		int write(char* buffer, int len, int offset = 0);
+		bool setblock(bool block);
+		bool isblock();
 		int availavle();
 		void close();
 		bool isClose();
