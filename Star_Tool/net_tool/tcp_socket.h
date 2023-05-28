@@ -15,16 +15,15 @@ namespace star {
 	private:
 		std::atomic<bool> close_flag;		//关闭flag
 		std::atomic<bool> block_flag;		//阻塞标志位
+		std::shared_ptr<socket_addr_container> ip_address;	//填装地址的容器
 		star_socket star_socket_handle;		//socket句柄
-		socket_addr ip_address;				//socket地址信息
-		socklen_t address_len = sizeof(star_sockaddr);	//socket地址信息长度
-		star::ip_type IP_type;				//socket种类
 		friend class tcp_socket_server;		//友元类
 		tcp_socket();						//保留默认构造函数给友元类tcp_socket_server使用
 	public:
 		tcp_socket(tcp_socket&& MoveSource) noexcept;	//移动构造函数
 		tcp_socket(const tcp_socket&) = delete;			//删除默认拷贝函数
-		tcp_socket(std::string ip, unsigned short port, star::ip_type IP_type = star::ip_type::ipv4);
+		tcp_socket(std::string ip_or_domain, unsigned short port);
+		tcp_socket(std::string domain_name);
 		~tcp_socket();
 		int read(char* buffer, int len, int offset = 0);
 		int write(char* buffer, int len, int offset = 0);
@@ -33,28 +32,38 @@ namespace star {
 		int availavle();
 		void close();
 		bool isClose();
+		/*
+		* 释放地址容器
+		*/
+		void freeAddr();
+		/*
+		* 获取地址容器
+		*/
+		std::shared_ptr<socket_addr_container> getAddr();
 	};
 
 	class tcp_socket_server {
 	private:
-		std::atomic<bool> close_flag;
-		tcp_socket::star_socket star_socket_handle;
-		socket_addr ip_address;
-		socklen_t address_len = sizeof(tcp_socket::star_sockaddr);
-		star::ip_type IP_type;
 		int connect_num;
-		void Initialize(unsigned short port);
+		tcp_socket::star_socket star_socket_handle;
+		std::shared_ptr<socket_addr_container> ip_address;	//填装地址的容器
+		std::atomic<bool> close_flag;
 	public:
-		tcp_socket_server(std::string ip, unsigned short port,
-			int connect_num = SOMAXCONN,
-			star::ip_type IP_type = star::ip_type::ipv4);
-		tcp_socket_server(unsigned short port, int connect_num = SOMAXCONN,
-			star::ip_type IP_type = star::ip_type::ipv4);
+		tcp_socket_server(std::string ip_or_domain, unsigned short port,int connect_num = SOMAXCONN);
+		tcp_socket_server(unsigned short port,star::ip_type IP_type = star::ip_type::ipv4, int connect_num = SOMAXCONN);
 		~tcp_socket_server();
 		tcp_socket accept();
 		unsigned short getPort();
 		void close();
 		bool isClose();
+		/*
+		* 释放地址容器
+		*/
+		void freeAddr();
+		/*
+		* 获取地址容器
+		*/
+		std::shared_ptr<socket_addr_container> getAddr();
 	};
 }
 
