@@ -11,7 +11,7 @@ namespace star {
 		bool reverse = false;
 		while (Begin < End) {
 			if (reverse) {
-				if (*Begin <= *End) Begin++;
+				if (*Begin <= *End) ++Begin;
 				else {
 					std::swap(*Begin, *End);
 					reverse = false;
@@ -38,7 +38,7 @@ namespace star {
 		bool reverse = false;
 		while (Begin < End) {
 			if (reverse) {
-				if (*Begin <= *End) Begin++;
+				if (*Begin <= *End) ++Begin;
 				else {
 					std::swap(*Begin, *End);
 					reverse = false;
@@ -67,7 +67,7 @@ namespace star {
 		bool reverse = false;
 		while (Begin < End) {
 			if (reverse) {
-				if (*Begin <= *End) Begin++;
+				if (*Begin <= *End) ++Begin;
 				else {
 					std::swap(*Begin, *End);
 					reverse = false;

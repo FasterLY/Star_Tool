@@ -267,7 +267,22 @@ namespace star {
 	tcp_socket tcp_socket_server::accept()
 	{
 		tcp_socket client_socket{};
-		switch (this->ip_address->ip_protocol)
+		ip_type socket_type;
+		if (this->ip_address != nullptr)
+		{
+			socket_type = this->ip_address->ip_protocol;
+		}
+		else //需要从内核中判断协议族类型
+		{
+			struct sockaddr_storage addr;
+			socklen_t addrlen = sizeof(addr);
+			int ret = getsockname(this->star_socket_handle, (struct sockaddr*)&addr, &addrlen);
+			if (addr.ss_family == AF_INET)
+				socket_type = star::ip_type::ipv4;
+			else if (addr.ss_family == AF_INET6)
+				socket_type = star::ip_type::ipv4;
+		}
+		switch (socket_type)
 		{
 		case star::ip_type::ipv4:
 			client_socket.ip_address->addr_len = sizeof(sockaddr_in);
@@ -287,7 +302,20 @@ namespace star {
 	unsigned short tcp_socket_server::getPort()
 	{
 		if (this->ip_address == nullptr) {
-			throw net_exception("socket address has been freed!");
+			struct sockaddr_storage addr;
+			socklen_t addrlen = sizeof(addr);
+			int ret = getsockname(this->star_socket_handle, (struct sockaddr*)&addr, &addrlen);
+			if (addr.ss_family == AF_INET) {
+				struct sockaddr_in* sin_ptr = (struct sockaddr_in*)&addr;
+				return ntohs(sin_ptr->sin_port);
+			}
+			else if (addr.ss_family == AF_INET6) {
+				struct sockaddr_in6* sin6_ptr = (struct sockaddr_in6*)&addr;
+				return ntohs(sin6_ptr->sin6_port);
+			}
+			else {
+				throw net_exception("socket address has been freed ! option in system has been deleted !");
+			}
 		}
 		switch (this->ip_address->ip_protocol)
 		{

@@ -131,6 +131,16 @@ namespace star {
 		return this->connect_flag.load(std::memory_order_acquire);
 	}
 
+	void udp_socket::freeAddr()
+	{
+		this->ip_address = nullptr;
+	}
+
+	std::shared_ptr<socket_addr_container> udp_socket::getAddr()
+	{
+		return this->ip_address;
+	}
+
 	udp_socket_server::udp_socket_server(std::string ip_or_domain, unsigned short port)
 		:close_flag(false)
 	{
@@ -213,6 +223,7 @@ namespace star {
 	std::pair<int, socket_addr_container> udp_socket_server::read(char* buffer, int len, int offset)
 	{
 		socket_addr_container source{};
+
 		int ret = ::recvfrom(this->star_socket_handle, buffer + offset, len, 0, (udp_socket::star_sockaddr*)&(source.ip_address), &(source.addr_len));
 		return std::pair<int, socket_addr_container>(ret, std::move(source));
 	}
@@ -240,5 +251,13 @@ namespace star {
 	bool udp_socket_server::isClose()
 	{
 		return this->close_flag.load(std::memory_order_acquire);
+	}
+	void udp_socket_server::freeAddr()
+	{
+		this->ip_address = nullptr;
+	}
+	std::shared_ptr<socket_addr_container> udp_socket_server::getAddr()
+	{
+		return this->ip_address;
 	}
 }
