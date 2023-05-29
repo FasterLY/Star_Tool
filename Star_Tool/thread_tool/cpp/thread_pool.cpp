@@ -4,10 +4,10 @@ namespace star {
 	thread_pool::thread_pool(int thread_size)
 		:thread_size(thread_size), real_size(thread_size), interrupt_flag(false), thread_id_travel(1)
 	{
-		for (int i = 0; i < thread_size; i++) {
+		for (int i = 0; i < thread_size; ++i) {
 			thread_map.try_emplace(thread_id_travel, &thread_pool::run_task, this, thread_id_travel);
 			thread_runable_map.insert_or_assign(thread_id_travel, true);
-			thread_id_travel++;
+			++thread_id_travel;
 		}
 	}
 
@@ -61,10 +61,10 @@ namespace star {
 	{
 		int old_thread_size = this->thread_size.load(std::memory_order_acquire);
 		if (thread_size > old_thread_size) {
-			for (int i = 0; i < thread_size - old_thread_size; i++) {
+			for (int i = 0; i < thread_size - old_thread_size; ++i) {
 				thread_map.try_emplace(thread_id_travel, &thread_pool::run_task, this, thread_id_travel);
 				thread_runable_map.insert_or_assign(thread_id_travel, true);
-				thread_id_travel++;
+				++thread_id_travel;
 			}
 			real_size.store(thread_size, std::memory_order_release);
 			this->thread_size.store(thread_size, std::memory_order_release);
@@ -76,7 +76,7 @@ namespace star {
 			while (old_thread_size > thread_size) {
 				for (auto runable_travel = thread_runable_map.begin(); runable_travel != thread_runable_map.end();) {
 					auto runable_travel_next = runable_travel;
-					runable_travel_next++;
+					++runable_travel_next;
 					if (!runable_travel->second) {
 						std::lock_guard lock(this->map_lock);
 						thread_map[runable_travel->first].detach();

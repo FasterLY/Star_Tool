@@ -81,6 +81,7 @@ private:
 int main() {
 	char msg[] = "hello linux";
 	star::tcp_socket_server server_socket(8888);
+	server_socket.freeAddr();
 	star::tcp_socket client_socket = server_socket.accept();
 	char buffer[1024];
 	client_socket.read(buffer, 1024);

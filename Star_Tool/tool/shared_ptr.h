@@ -42,7 +42,7 @@ namespace star {
 		: strong_ref(CopySource.strong_ref), weak_ref(CopySource.weak_ref),
 		ptr_data(CopySource.ptr_data)
 	{
-		(*(this->strong_ref))++;
+		++(*(this->strong_ref));
 		/*	//无差错等效方法：
 		int destination = strong_ref->load(std::memory_order_acquire);
 		while (!strong_ref->compare_exchange_weak(destination, destination + 1));
@@ -98,7 +98,7 @@ namespace star {
 				delete this->weak_ref;
 			}
 		}
-		(*(CopySource.strong_ref))++;
+		++(*(CopySource.strong_ref));
 		this->strong_ref = CopySource.strong_ref;
 		this->weak_ref = CopySource.weak_ref;
 		this->ptr_data = CopySource.ptr_data;
