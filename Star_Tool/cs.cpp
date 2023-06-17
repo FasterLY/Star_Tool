@@ -1,90 +1,40 @@
+
+
+#include<random>
 #include<iostream>
+#include<chrono>
 #include<vector>
-#include"net_tool/tcp_socket.h"
-#include"tool/array.h"
-#include"tool/hash_val.h"
-#ifdef _WIN32
-#include<Windows.h>
-#endif // WIN32
-
+#include"algorithm/async_quick_sort.h"
+const int num_size = 1000000;
 using namespace std;
-class Obj_cs {
-public:
-	Obj_cs(int i) {
-		//memset(this, 0, sizeof(decltype(*this)));
-		cout << "Obj_cs is created" << endl;
-		this->cs();
-	}
-	virtual ~Obj_cs() {
-		cout << "Obj_cs is deleted" << endl;
-	}
-	virtual void cs() {
-		std::cout << "Obj_cs Base test..." << std::endl;
-	}
-};
-
-class Obj_cs2 :public Obj_cs {
-public:
-	Obj_cs2() :Obj_cs(0) {
-		//memset(this, 0, sizeof(decltype(*this)));
-		cout << "Obj_cs2 is created" << endl;
-		this->cs();
-	}
-	virtual ~Obj_cs2() override {
-		cout << "Obj_cs2 is deleted" << endl;
-	}
-	virtual void cs() override {
-		std::cout << "Obj_cs2 test..." << i << std::endl;
-	}
-	void func() {
-		cout << "Obj_cs2 func " <<i<< endl;
-	}
-	int i = 999;
-};
-#include<atomic>
-#include<thread>
-#include<algorithm>
-#include<mutex>
-#include"tool/shared_ptr.h"
-#include"thread_tool/thread.h"
-#include"bytes_tool/byte_array.h"
-#include"safe_container/no_mutex/queue.h"
-#include"tool/get_set.h"
-namespace star {
-	extern int i;
-}
-
-class MyClass
+int main()
 {
-public:
-	MyClass() :buf { 0 }
-	{}
-	~MyClass() = default;
-	star::get_set<int> Buf{ 
-		//data:
-		this->buf,
-		//getter:
-		[](int i) {
-			return i;
-		},
-		//setter:
-		[](int i) {
-			return i > 99 ? 99 : i;
-		} 
-	};
-private:
-	int buf;
-};
-#include"thread_tool/thread_pool.h"
-#include"thread_tool/thread.h"
-#include"thread_tool/interrupt_cin.h"
-int main() {
-	char msg[] = "hello linux";
-	star::tcp_socket_server server_socket(8888);
-	server_socket.freeAddr();
-	star::tcp_socket client_socket = server_socket.accept();
-	char buffer[1024];
-	client_socket.read(buffer, 1024);
-	cout << buffer;
-	client_socket.write(msg, sizeof(msg));
+    default_random_engine eng;
+    uniform_int_distribution<int> dis(0, 100000);
+
+    vector<int> vec0;
+    vec0.reserve(num_size);
+    for (int i = 0; i < num_size; ++i) {
+        vec0.push_back(dis(eng));
+    }
+
+    vector<int> vec1 = vec0;
+    vector<int> vec2 = vec0;
+    vector<int> vec3 = vec0;
+    star::thread_pool pool(10);
+    std::chrono::system_clock::time_point tp_point0, tp_point1, tp_point3;
+    tp_point0 = std::chrono::system_clock::now();
+
+    star::quicksort(vec1.begin(), vec1.end());
+    tp_point1 = std::chrono::system_clock::now();
+
+    star::quicksort_threadpool(vec1.begin(), vec1.end(), pool);
+    tp_point3 = std::chrono::system_clock::now();
+
+    std::chrono::system_clock::duration dua = tp_point1 - tp_point0;
+    int total_time = std::chrono::duration_cast<std::chrono::milliseconds>(dua).count();
+    printf("quick sort Total time: %d miliseconds\n", total_time);
+    dua = tp_point3 - tp_point1;
+    total_time = std::chrono::duration_cast<std::chrono::milliseconds>(dua).count();
+    printf("quick sort thread pool Total time: %d miliseconds\n", total_time);
 }

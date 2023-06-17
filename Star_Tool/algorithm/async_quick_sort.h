@@ -1,88 +1,67 @@
 #pragma once
 #include<future>
 #include<algorithm>
+#include <type_traits>
 #include"../thread_tool/thread_pool.h"
 namespace star {
 	template<typename Iterator>
 	void quicksort(Iterator begin, Iterator end) {
-		if (end - begin < 2)return;
-		Iterator Begin = begin;
-		Iterator End = end - 1;
-		bool reverse = false;
-		while (Begin < End) {
-			if (reverse) {
-				if (*Begin <= *End) ++Begin;
-				else {
-					std::swap(*Begin, *End);
-					reverse = false;
-				}
-			}
-			else {
-				if (*Begin <= *End) End--;
-				else {
-					std::swap(*Begin, *End);
-					reverse = true;
-				}
+		if (std::distance(begin, end) < 2) return;
+		Iterator pivot = std::next(begin, std::distance(begin, end) / 2);
+		auto const& pivot_value = *pivot;
+		Iterator left = begin;
+		Iterator right = std::prev(end);
+		while (left <= right) {
+			while (*left < pivot_value) ++left;
+			while (*right > pivot_value) --right;
+			if (left <= right) {
+				std::iter_swap(left, right);
+				++left;
+				--right;
 			}
 		}
-		Begin = reverse ? End : Begin;
-		quicksort(begin, Begin);
-		quicksort(Begin+1, end);
+		quicksort(begin, right);
+		quicksort(left, end);
 	}
 
 	template<typename Iterator>
 	void quicksort_threads(Iterator begin, Iterator end) {
-		if (end - begin < 2)return;
-		Iterator Begin = begin;
-		Iterator End = end - 1;
-		bool reverse = false;
-		while (Begin < End) {
-			if (reverse) {
-				if (*Begin <= *End) ++Begin;
-				else {
-					std::swap(*Begin, *End);
-					reverse = false;
-				}
-			}
-			else {
-				if (*Begin <= *End)
-					End--;
-				else {
-					std::swap(*Begin, *End);
-					reverse = true;
-				}
+		if (std::distance(begin, end) < 2) return;
+		Iterator pivot = std::next(begin, std::distance(begin, end) / 2);
+		auto const& pivot_value = *pivot;
+		Iterator left = begin;
+		Iterator right = std::prev(end);
+		while (left <= right) {
+			while (*left < pivot_value) ++left;
+			while (*right > pivot_value) --right;
+			if (left <= right) {
+				std::iter_swap(left, right);
+				++left;
+				--right;
 			}
 		}
-		Begin = reverse ? End : Begin;
-		std::thread th1(quicksort_threads<Iterator>, Begin + 1, end);
-		quicksort_threads(begin, Begin);
+		std::thread th1(quicksort_threads<Iterator>, left, end);
+		quicksort_threads(begin, right);
 		th1.join();
 	}
 
 	template<typename Iterator>
-	void quicksort_threadpool(Iterator begin, Iterator end,thread_pool& pool) {
-		if (end - begin < 2)return;
-		Iterator Begin = begin;
-		Iterator End = end - 1;
-		bool reverse = false;
-		while (Begin < End) {
-			if (reverse) {
-				if (*Begin <= *End) ++Begin;
-				else {
-					std::swap(*Begin, *End);
-					reverse = false;
-				}
-			} 
-			else {
-				if (*Begin <= *End) End--;
-				else {
-					std::swap(*Begin, *End);
-					reverse = true;
-				}
+	void quicksort_threadpool(Iterator begin, Iterator end, thread_pool& pool) {
+		if (std::distance(begin, end) < 2) return;
+		Iterator pivot = std::next(begin, std::distance(begin, end) / 2);
+		auto const& pivot_value = *pivot;
+		Iterator left = begin;
+		Iterator right = std::prev(end);
+		while (left <= right) {
+			while (*left < pivot_value) ++left;
+			while (*right > pivot_value) --right;
+			if (left <= right) {
+				std::iter_swap(left, right);
+				++left;
+				--right;
 			}
 		}
-		Begin = reverse ? End : Begin;
-		pool.submit(quicksort_threadpool<Iterator>, Begin + 1, end, std::ref(pool));
-		quicksort_threadpool(begin, Begin, pool);
+		pool.submit(quicksort_threadpool<Iterator>, left , end, std::ref(pool));
+		quicksort_threadpool(begin, right, pool);
 	}
 }

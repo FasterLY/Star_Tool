@@ -192,4 +192,44 @@ namespace star {
 	{
 		memset(&MoveSource, 0, sizeof(MoveSource));
 	}
+
+	socket_addr_container& socket_addr_container::operator=(socket_addr_container&& MoveSource) noexcept
+	{
+		// TODO: 在此处插入 return 语句
+	}
+
+	std::string socket_addr_container::getAddr_Str()
+	{
+		switch (this->ip_protocol)
+		{
+		case star::ip_type::ipv4:
+			char ip[INET_ADDRSTRLEN];
+			inet_ntop(AF_INET, &(this->ip_address.ipv4.sin_addr), ip, INET_ADDRSTRLEN);
+			return ip;
+			break;
+		case star::ip_type::ipv6:
+			char ip_6[INET6_ADDRSTRLEN];
+			inet_ntop(AF_INET, &(this->ip_address.ipv6.sin6_addr), ip_6, INET6_ADDRSTRLEN);
+			return ip;
+			break;
+		default:
+			return "";
+			break;
+		}
+	}
+	unsigned short socket_addr_container::getPort()
+	{
+		switch (this->ip_protocol)
+		{
+		case star::ip_type::ipv4:
+			return ntohs(this->ip_address.ipv4.sin_port);
+			break;
+		case star::ip_type::ipv6:
+			return ntohs(this->ip_address.ipv6.sin6_port);
+			break;
+		default:
+			return -1;
+			break;
+		}
+	}
 }

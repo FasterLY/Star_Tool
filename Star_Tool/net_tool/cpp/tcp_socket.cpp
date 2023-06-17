@@ -1,4 +1,21 @@
 #include"../tcp_socket.h"
+#ifdef _WIN32							//Windows头文件
+#pragma comment(lib,"ws2_32.lib")		//链接动态库
+#ifndef _WINSOCKAPI_					//防止重复载入头文件
+#include <Winsock2.h>  
+#include<WS2tcpip.h>
+#endif
+#elif __linux__
+#include<sys/socket.h>
+#include<sys/ioctl.h>
+#include<fcntl.h>
+#include<arpa/inet.h>
+#include<unistd.h>
+#include<netdb.h>
+#endif
+#include<atomic>
+
+
 #ifdef _WIN32
 #define STAR_INVALID_SOCKET INVALID_SOCKET
 #define STAR_IN4ADDR_ANY in4addr_any
@@ -281,6 +298,8 @@ namespace star {
 				socket_type = star::ip_type::ipv4;
 			else if (addr.ss_family == AF_INET6)
 				socket_type = star::ip_type::ipv4;
+			else
+				throw net_exception("ip type get fail!");
 		}
 		switch (socket_type)
 		{
@@ -317,17 +336,8 @@ namespace star {
 				throw net_exception("socket address has been freed ! option in system has been deleted !");
 			}
 		}
-		switch (this->ip_address->ip_protocol)
-		{
-		case star::ip_type::ipv4:
-			return ntohs(this->ip_address->ip_address.ipv4.sin_port);
-			break;
-		case star::ip_type::ipv6:
-			return ntohs(this->ip_address->ip_address.ipv6.sin6_port);
-			break;
-		default:
-			return 0;
-			break;
+		else {
+			return this->ip_address->getPort();
 		}
 	}
 
@@ -348,12 +358,41 @@ namespace star {
 	{
 		return this->close_flag.load(std::memory_order_acquire);
 	}
+
 	void tcp_socket_server::freeAddr()
 	{
 		this->ip_address = nullptr;
 	}
+
 	std::shared_ptr<socket_addr_container> tcp_socket_server::getAddr()
 	{
 		return this->ip_address;
+	}
+
+	std::string tcp_socket_server::getAddr_Str()
+	{
+		if (this->ip_address == nullptr) {
+			struct sockaddr_storage addr;
+			socklen_t addrlen = sizeof(addr);
+			int ret = getsockname(this->star_socket_handle, (struct sockaddr*)&addr, &addrlen);
+			if (addr.ss_family == AF_INET) {
+				struct sockaddr_in* sin_ptr = (struct sockaddr_in*)&addr;
+				char ip[INET_ADDRSTRLEN];
+				inet_ntop(AF_INET, &(sin_ptr->sin_addr), ip, INET_ADDRSTRLEN);
+				return ip;
+			}
+			else if (addr.ss_family == AF_INET6) {
+				struct sockaddr_in6* sin6_ptr = (struct sockaddr_in6*)&addr;
+				char ip[INET6_ADDRSTRLEN];
+				inet_ntop(AF_INET, &(sin6_ptr->sin6_addr), ip, INET6_ADDRSTRLEN);
+				return ip;
+			}
+			else {
+				throw net_exception("socket address has been freed ! option in system has been deleted !");
+			}
+		}
+		else {
+			return this->ip_address->getAddr_Str();
+		}
 	}
 }

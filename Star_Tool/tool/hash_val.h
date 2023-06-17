@@ -21,7 +21,7 @@ namespace star {
 		friend inline std::size_t hash_val(const Types&... args);
 	};
 	template<typename... Types>
-	inline std::size_t hash_val(const Types&... args) {
+	std::size_t hash_val(const Types&... args) {
 		std::size_t seed = 0;
 		hash::hash_val(seed, args...);
 		return seed;
