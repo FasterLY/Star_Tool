@@ -33,7 +33,7 @@ namespace star {
 	extern void net_Initialize();
 #endif
 	tcp_socket::tcp_socket()
-		:star_socket_handle(STAR_INVALID_SOCKET), close_flag(false), block_flag(true), ip_address(std::make_shared<socket_addr_container>())
+		:star_socket_handle(STAR_INVALID_SOCKET), close_flag(false), block_flag(true), ip_address(std::make_shared<socket_addr_container>(ip_type::ipv4))
 	{}
 
 	tcp_socket::tcp_socket(tcp_socket&& MoveSource) noexcept

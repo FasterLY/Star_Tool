@@ -1,6 +1,5 @@
 #pragma once
 #include"net_shared.h"
-#include"star_poll.h"
 #include<string>
 namespace star {
 	class tcp_socket_server;

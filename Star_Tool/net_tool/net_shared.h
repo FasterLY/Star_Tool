@@ -58,7 +58,7 @@ namespace star {
 		socklen_t addr_len;
 		ip_type ip_protocol;
 	public:
-		socket_addr_container();
+		socket_addr_container(ip_type ip_protocol);
 		socket_addr_container(unsigned short port, ip_type ip_protocol);
 		socket_addr_container(std::string domain);
 		socket_addr_container(std::string ip_or_domain, unsigned short port);

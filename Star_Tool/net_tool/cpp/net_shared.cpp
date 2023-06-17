@@ -100,9 +100,21 @@ namespace star {
 		}
 	}
 
-	socket_addr_container::socket_addr_container()
+	socket_addr_container::socket_addr_container(ip_type ip_protocol)
 	{
 		memset(this, 0, sizeof(socket_addr_container));
+		switch (ip_protocol)
+		{
+		case star::ip_type::ipv4:
+			this->addr_len = sizeof(sockaddr_in);
+			break;
+		case star::ip_type::ipv6:
+			this->addr_len = sizeof(sockaddr_in6);
+			break;
+		default:
+			throw net_exception("undefined ip type!\n");
+			break;
+		}
 	}
 
 	socket_addr_container::socket_addr_container(std::string domain)
@@ -191,11 +203,6 @@ namespace star {
 		:ip_address(MoveSource.ip_address), addr_len(MoveSource.addr_len), ip_protocol(MoveSource.ip_protocol)
 	{
 		memset(&MoveSource, 0, sizeof(MoveSource));
-	}
-
-	socket_addr_container& socket_addr_container::operator=(socket_addr_container&& MoveSource) noexcept
-	{
-		// TODO: 在此处插入 return 语句
 	}
 
 	std::string socket_addr_container::getAddr_Str()

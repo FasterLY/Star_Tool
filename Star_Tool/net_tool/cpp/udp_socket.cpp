@@ -222,7 +222,7 @@ namespace star {
 
 	std::pair<int, socket_addr_container> udp_socket_server::read(char* buffer, int len, int offset)
 	{
-		socket_addr_container source{};
+		socket_addr_container source{this->ip_address->ip_protocol};
 
 		int ret = ::recvfrom(this->star_socket_handle, buffer + offset, len, 0, (udp_socket::star_sockaddr*)&(source.ip_address), &(source.addr_len));
 		return std::pair<int, socket_addr_container>(ret, std::move(source));
@@ -230,7 +230,6 @@ namespace star {
 
 	int udp_socket_server::write(socket_addr_container& destination, char* buffer, int len, int offset)
 	{
-		socket_addr_container source{};
 		int ret = ::sendto(this->star_socket_handle, buffer + offset, len, 0, (udp_socket::star_sockaddr*)&(destination.ip_address), destination.addr_len);
 		return ret;
 	}
