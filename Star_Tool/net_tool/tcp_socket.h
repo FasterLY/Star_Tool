@@ -1,5 +1,6 @@
 #pragma once
 #include"net_shared.h"
+#include"star_poll.h"
 #include<string>
 namespace star {
 	class tcp_socket_server;
@@ -17,7 +18,6 @@ namespace star {
 		std::atomic<bool> block_flag;		//阻塞标志位
 		std::shared_ptr<socket_addr_container> ip_address;	//填装地址的容器
 		star_socket star_socket_handle;		//socket句柄
-		friend class tcp_socket_server;		//友元类
 		tcp_socket();						//保留默认构造函数给友元类tcp_socket_server使用
 	public:
 		tcp_socket(tcp_socket&& MoveSource) noexcept;	//移动构造函数
@@ -40,6 +40,11 @@ namespace star {
 		* 获取地址容器
 		*/
 		std::shared_ptr<socket_addr_container> getAddr();
+	public:
+		/*
+		* 友元类
+		*/
+		friend class tcp_socket_server;
 	};
 
 	class tcp_socket_server {
@@ -64,6 +69,14 @@ namespace star {
 		* 获取地址容器
 		*/
 		std::shared_ptr<socket_addr_container> getAddr();
+		/*
+		* 获取地址字符串
+		*/
+		std::string getAddr_Str();
+	public:
+		/*
+		* 友元类
+		*/
 	};
 }
 

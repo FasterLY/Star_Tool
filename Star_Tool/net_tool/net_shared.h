@@ -64,6 +64,13 @@ namespace star {
 		socket_addr_container(std::string ip_or_domain, unsigned short port);
 		socket_addr_container(socket_addr_container&& MoveSource)noexcept;
 		socket_addr_container(const socket_addr_container&) = default;
+		socket_addr_container& operator=(const socket_addr_container&) = default;
+		socket_addr_container& operator=(socket_addr_container&& MoveSource) = default;
+		/*
+		* »ñÈ¡µØÖ·×Ö·û´®
+		*/
+		std::string getAddr_Str();
+		unsigned short getPort();
 		friend class tcp_socket_server;
 		friend class tcp_socket;
 		friend class udp_socket_server;
