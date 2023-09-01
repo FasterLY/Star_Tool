@@ -70,6 +70,7 @@
     <ClInclude Include="tool\shared_ptr.h" />
     <ClInclude Include="tool\get_set.h" />
     <ClInclude Include="net_tool\net_shared.h" />
+    <ClInclude Include="tool\coroutineHandle.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cs.cpp">

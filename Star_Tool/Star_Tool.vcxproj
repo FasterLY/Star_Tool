@@ -148,6 +148,7 @@
     <ClInclude Include="net_tool\tcp_socket.h" />
     <ClInclude Include="thread_tool\thread_pool.h" />
     <ClInclude Include="net_tool\udp_socket.h" />
+    <ClInclude Include="tool\coroutineHandle.h" />
     <ClInclude Include="tool\getter_setter.h" />
     <ClInclude Include="tool\get_set.h" />
     <ClInclude Include="tool\hash_val.h" />

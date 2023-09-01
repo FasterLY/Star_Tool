@@ -1,25 +1,59 @@
-#include"net_tool/udp_socket.h"
-#include<iostream>
+#include <iostream>
 using namespace std;
-int main() {
-	try
-	{
-		star::udp_socket_server server_socket(8888);
-		char buffer[2048];
-		pair<int, star::socket_addr_container> read_msg = server_socket.read(buffer, 2048);
-		{
-			DWORD error = GetLastError();
-			LPSTR messageBuffer = nullptr;
-			size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-				nullptr, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, nullptr);
-			std::cout << "socket failed with error: " << error << " - " << messageBuffer << std::endl;
-			LocalFree(messageBuffer);
-		}
-		cout << read_msg.second.getAddr_Str() << ":" << read_msg.second.getPort() << endl;
-		cout << buffer;
-	}
-	catch (const std::exception& e)
-	{
-		cout << e.what() << endl;
-	}
+#include"tool/coroutineHandle.h"
+class MyAwaiter :star::awaiter {
+public:
+    //协程初始化完毕
+    virtual bool await_ready() {
+        cout << __func__ << endl;
+        return false;
+    }
+    //协程暂停
+    virtual void await_suspend(std::coroutine_handle<> h) {
+        cout << __func__ << endl;
+    }
+    //协程恢复
+    virtual void await_resume() {
+        cout << __func__ << endl;
+    }
+};
+
+star::co_handle<bool> funcMachine() {
+    co_yield true;
+    co_yield true;
+    cout << "before resume" << endl;
+    co_await star::resume_waiter([]() {cout << "resume" << endl; });
+    cout << "after resume" << endl;
+    co_return;
+}
+
+star::co_handle<void> voidMachine() {
+    cout << "before resume" << endl;
+    co_yield nullptr;
+    cout << "after resume" << endl;
+    co_return;
+}
+
+star::co_handle<bool, true, true> returnMachine() {
+    co_yield true;
+    co_yield true;
+    cout << "before resume" << endl;
+    co_await star::resume_waiter([]() {cout << "resume" << endl; });
+    cout << "after resume" << endl;
+    co_return false;
+}
+
+int main()
+{
+    //star::coroutineHandle<int> ranger = numMachine(3);
+    //star::co_handle<bool> funcInstance = funcMachine();
+    auto suspendInstance = returnMachine();
+    int i = 1;
+
+    while (!suspendInstance.isEnd()) {
+        cout << i++ << " ";
+        suspendInstance.resume();
+        cout << endl << suspendInstance.getIterator().operator*();
+    }
+    cout << endl << suspendInstance.getIterator().operator*();
 }
