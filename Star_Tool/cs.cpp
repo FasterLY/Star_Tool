@@ -27,14 +27,14 @@ star::co_handle<bool> funcMachine() {
     co_return;
 }
 
-star::co_handle<void> voidMachine() {
+star::co_handle<star::suspend> voidMachine() {
     cout << "before resume" << endl;
     co_yield nullptr;
     cout << "after resume" << endl;
     co_return;
 }
 
-star::co_handle<bool, true, true> returnMachine() {
+star::co_handle<bool, star::has_return> returnMachine() {
     co_yield true;
     co_yield true;
     cout << "before resume" << endl;
@@ -47,13 +47,11 @@ int main()
 {
     //star::coroutineHandle<int> ranger = numMachine(3);
     //star::co_handle<bool> funcInstance = funcMachine();
-    auto suspendInstance = returnMachine();
+    auto suspendInstance = funcMachine();
     int i = 1;
 
     while (!suspendInstance.isEnd()) {
         cout << i++ << " ";
         suspendInstance.resume();
-        cout << endl << suspendInstance.getIterator().operator*();
     }
-    cout << endl << suspendInstance.getIterator().operator*();
 }

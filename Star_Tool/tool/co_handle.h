@@ -6,6 +6,10 @@ namespace star {
     * 适用于C++20及以上版本的协程返回句柄对象
     */
 
+    /* 有返回值标志位，用于填入协程句柄的模板参数 */
+    class has_return { has_return() = delete; };
+    /* 开始时挂起协程的标志位，用于填入协程句柄的模板参数 */
+    class suspend { suspend() = delete; };
     /*
     * 可继承重写的协程控制器
     */
@@ -63,7 +67,7 @@ namespace star {
     /*
     * 协程句柄类，默认参数无返回值无初始挂起
     */
-    template<typename ValueType, bool co_returnValue = false, bool suspend = false >
+    template<typename ValueType,typename... Args>
 	class co_handle {
     public:
         /*
@@ -81,7 +85,7 @@ namespace star {
         iterator getIterator() { return iterator{ this }; }
     private:
         promise_type* coroutine_promise_ptr;
-        using co_handle_item = co_handle <ValueType, co_returnValue, suspend>;
+        using co_handle_item = co_handle <ValueType>;
         class promise_type
         {
         private:
@@ -111,7 +115,7 @@ namespace star {
         public:
             iterator(co_handle_item* handle) :handle(handle) {};
             bool operator!=(const nullptr_t& _) { return !handle->coroutine_promise_ptr->coroutine_end_flag; };
-            co_handle_item::iterator& operator++() { std::coroutine_handle<promise_type>::from_promise(*handle->coroutine_promise_ptr)(); return *this; };
+            iterator& operator++() { std::coroutine_handle<promise_type>::from_promise(*handle->coroutine_promise_ptr)(); return *this; };
             ValueType& operator*() { return handle->coroutine_promise_ptr->value; }
         };
 	};
@@ -120,7 +124,7 @@ namespace star {
     * 特化挂起版本无返回值
     */
     template<typename ValueType>
-    class co_handle <ValueType, false, true>
+    class co_handle <ValueType, suspend>
     {
     public:
         /*
@@ -138,7 +142,7 @@ namespace star {
         iterator getIterator() { return iterator{ this }; }
     private:
         promise_type* coroutine_promise_ptr;
-        using co_handle_item = co_handle <ValueType, false, true>;
+        using co_handle_item = co_handle <ValueType, suspend>;
         class promise_type
         {
         private:
@@ -149,7 +153,7 @@ namespace star {
             friend class co_handle_item;
             promise_type() :coroutine_end_flag(false) {};
             //返回句柄
-            co_handle<ValueType, false, true> get_return_object() { return { this }; }
+            co_handle_item get_return_object() { return { this }; }
             //设置初始协程状态是挂起还是运行
             std::suspend_always initial_suspend() { return {}; }
             //设置协程结束后的状态为结束状态
@@ -168,7 +172,7 @@ namespace star {
         public:
             iterator(co_handle_item* handle) :handle(handle) {};
             bool operator!=(const nullptr_t& _) { return !handle->coroutine_promise_ptr->coroutine_end_flag; };
-            co_handle_item::iterator& operator++() { std::coroutine_handle<promise_type>::from_promise(*handle->coroutine_promise_ptr)(); return *this; };
+            iterator& operator++() { std::coroutine_handle<promise_type>::from_promise(*handle->coroutine_promise_ptr)(); return *this; };
             ValueType& operator*() { return handle->coroutine_promise_ptr->value; }
         };
     };
@@ -177,7 +181,7 @@ namespace star {
     * 特化无挂起版本有返回值
     */
     template<typename ValueType>
-    class co_handle <ValueType, true, false>
+    class co_handle <ValueType, has_return>
     {
     public:
         /*
@@ -195,7 +199,7 @@ namespace star {
         iterator getIterator() { return iterator{ this }; }
     private:
         promise_type* coroutine_promise_ptr;
-        using co_handle_item = co_handle <ValueType, true, false>;
+        using co_handle_item = co_handle <ValueType, has_return>;
         class promise_type
         {
         private:
@@ -225,7 +229,7 @@ namespace star {
         public:
             iterator(co_handle_item* handle) :handle(handle) {};
             bool operator!=(const nullptr_t& _) { return !handle->coroutine_promise_ptr->coroutine_end_flag; };
-            co_handle_item::iterator& operator++() { std::coroutine_handle<promise_type>::from_promise(*handle->coroutine_promise_ptr)(); return *this; };
+            iterator& operator++() { std::coroutine_handle<promise_type>::from_promise(*handle->coroutine_promise_ptr)(); return *this; };
             ValueType& operator*() { return handle->coroutine_promise_ptr->value; }
         };
     };
@@ -234,7 +238,7 @@ namespace star {
     * 特化挂起版本有返回值
     */
     template<typename ValueType>
-    class co_handle <ValueType, true, true>
+    class co_handle <ValueType, has_return, suspend>
     {
     public:
         /*
@@ -252,7 +256,7 @@ namespace star {
         iterator getIterator() { return iterator{ this }; }
     private:
         promise_type* coroutine_promise_ptr;
-        using co_handle_item = co_handle <ValueType, true, true>;
+        using co_handle_item = co_handle <ValueType, has_return, suspend>;
         class promise_type
         {
         private:
@@ -282,13 +286,70 @@ namespace star {
         public:
             iterator(co_handle_item* handle) :handle(handle) {};
             bool operator!=(const nullptr_t& _) { return !handle->coroutine_promise_ptr->coroutine_end_flag; };
-            co_handle_item::iterator& operator++() { std::coroutine_handle<promise_type>::from_promise(*handle->coroutine_promise_ptr)(); return *this; };
+            iterator& operator++() { std::coroutine_handle<promise_type>::from_promise(*handle->coroutine_promise_ptr)(); return *this; };
             ValueType& operator*() { return handle->coroutine_promise_ptr->value; }
         };
     };
 
     /*
-    * 特化无数据返回版本
+    * 特化挂起版本有返回值
+    */
+    template<typename ValueType>
+    class co_handle <ValueType, suspend, has_return>
+    {
+    public:
+        /*
+        * 对外公布的数据结构
+        */
+        /* co_yield、co_wait、co_return 处理数据结构*/
+        class promise_type;
+        class iterator;
+    public:
+        co_handle(promise_type* coroutine_promise_ptr) :coroutine_promise_ptr(coroutine_promise_ptr) {}
+        iterator begin() { return resume(); }
+        nullptr_t end() { return nullptr; }
+        iterator resume() { std::coroutine_handle<promise_type>::from_promise(*coroutine_promise_ptr)(); return iterator{ this }; }
+        bool isEnd() { return coroutine_promise_ptr->coroutine_end_flag; }
+        iterator getIterator() { return iterator{ this }; }
+    private:
+        promise_type* coroutine_promise_ptr;
+        using co_handle_item = co_handle <ValueType, suspend, has_return>;
+        class promise_type
+        {
+        private:
+            bool coroutine_end_flag;
+            ValueType value;
+        public:
+            friend class co_handle_item::iterator;
+            friend class co_handle_item;
+            promise_type() :coroutine_end_flag(false) {};
+            //返回句柄
+            co_handle_item get_return_object() { return { this }; }
+            //设置初始协程状态是挂起还是运行
+            std::suspend_always initial_suspend() { return {}; }
+            //设置协程结束后的状态为结束状态
+            std::suspend_always final_suspend() noexcept { return {}; }
+            //协程运行返回值不为空
+            void return_value(ValueType value) { coroutine_end_flag = true; this->value = value; }
+            //设置协程临时挂起的返回值，完成设置后将当前协程挂起
+            std::suspend_always yield_value(ValueType yieldValue) { this->value = yieldValue; return {}; }
+            //意料外句柄错误
+            void unhandled_exception() {}
+        };
+        class iterator
+        {
+        private:
+            co_handle_item* handle;
+        public:
+            iterator(co_handle_item* handle) :handle(handle) {};
+            bool operator!=(const nullptr_t& _) { return !handle->coroutine_promise_ptr->coroutine_end_flag; };
+            iterator& operator++() { std::coroutine_handle<promise_type>::from_promise(*handle->coroutine_promise_ptr)(); return *this; };
+            ValueType& operator*() { return handle->coroutine_promise_ptr->value; }
+        };
+    };
+
+    /*
+    * 特化无数据返回版本的无初始挂起版本
     */
     template<>
     class co_handle<void>
@@ -305,6 +366,7 @@ namespace star {
         * 对象变量数据区
         */
         promise_type* coroutine_promise_ptr;
+        using co_handle_item = co_handle<void>;
     public:
         /*
         * 函数区（方法区）
@@ -319,13 +381,12 @@ namespace star {
         {
         private:
             bool coroutine_end_flag = false;
-            awaiter coroutine_awaiter;
         public:
-            friend class co_handle<void>::iterator;
-            friend class co_handle<void>;
+            friend class co_handle_item::iterator;
+            friend class co_handle_item;
             promise_type() {};
             //返回句柄
-            co_handle<void> get_return_object() { return { this }; }
+            co_handle_item get_return_object() { return { this }; }
             //返回恢复状态
             std::suspend_never initial_suspend() { return {}; }
             //返回恢复状态
@@ -333,19 +394,78 @@ namespace star {
             //协程运行返回值为空时结束设置标志位
             void return_void() { coroutine_end_flag = true; }
             //设置协程返回值
-            awaiter yield_value(nullptr_t&& _) { return coroutine_awaiter; }
+            std::suspend_always yield_value(nullptr_t&& _) { return {}; }
             //意料外句柄错误
             void unhandled_exception() {}
         };
         class iterator
         {
         private:
-            co_handle<void>* handle;
+            co_handle_item* handle;
         public:
-            iterator(co_handle<void>* handle) :handle(handle) {};
+            iterator(co_handle_item* handle) :handle(handle) {};
             bool operator!=(const nullptr_t& _) { return !handle->coroutine_promise_ptr->coroutine_end_flag; };
-            co_handle<void>::iterator& operator++() { std::coroutine_handle<promise_type>::from_promise(*handle->coroutine_promise_ptr)(); return *this; };
+            iterator& operator++() { std::coroutine_handle<promise_type>::from_promise(*handle->coroutine_promise_ptr)(); return *this; };
         };
     };
-
+    /*
+    * 特化无数据返回版本的有初始挂起版本
+    */
+    template<>
+    class co_handle<suspend>
+    {
+    public:
+        /*
+        * 对外公布的数据结构
+        */
+        /* co_yield、co_wait、co_return 处理数据结构*/
+        class promise_type;
+        class iterator;
+    private:
+        /*
+        * 对象变量数据区
+        */
+        promise_type* coroutine_promise_ptr;
+        using co_handle_item = co_handle<suspend>;
+    public:
+        /*
+        * 函数区（方法区）
+        */
+        co_handle(promise_type* coroutine_promise_ptr) :coroutine_promise_ptr(coroutine_promise_ptr) {}
+        iterator begin() { return iterator{ this }; }
+        nullptr_t end() { return nullptr; }
+        iterator resume() { std::coroutine_handle<promise_type>::from_promise(*coroutine_promise_ptr)(); return iterator{ this }; }
+        bool isEnd() { return coroutine_promise_ptr->coroutine_end_flag; }
+        iterator getIterator() { return iterator{ this }; }
+        class promise_type
+        {
+        private:
+            bool coroutine_end_flag = false;
+        public:
+            friend class co_handle_item::iterator;
+            friend class co_handle_item;
+            promise_type() {};
+            //返回句柄
+            co_handle_item get_return_object() { return { this }; }
+            //返回恢复状态
+            std::suspend_always initial_suspend() { return {}; }
+            //返回恢复状态
+            std::suspend_always final_suspend() noexcept { return {}; }
+            //协程运行返回值为空时结束设置标志位
+            void return_void() { coroutine_end_flag = true; }
+            //设置协程返回值
+            std::suspend_always yield_value(nullptr_t&& _) { return {}; }
+            //意料外句柄错误
+            void unhandled_exception() {}
+        };
+        class iterator
+        {
+        private:
+            co_handle_item* handle;
+        public:
+            iterator(co_handle_item* handle) :handle(handle) {};
+            bool operator!=(const nullptr_t& _) { return !handle->coroutine_promise_ptr->coroutine_end_flag; };
+            iterator& operator++() { std::coroutine_handle<promise_type>::from_promise(*handle->coroutine_promise_ptr)(); return *this; };
+        };
+    };
 }
