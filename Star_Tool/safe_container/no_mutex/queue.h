@@ -41,6 +41,10 @@ namespace star {
 				* 将数据从队首取出，若队列为空则取出的为nullptr空指针，否则为指向数据的数据指针unique_ptr
 				*/
 				std::unique_ptr<T> pop();
+				/*
+				* 返回队列是否为空
+				*/
+				bool empty() const;
 			private:
 				struct node;
 				struct counted_node_ptr;
@@ -284,6 +288,14 @@ namespace star {
 			inline queue<T>::counted_node_ptr::counted_node_ptr(int external_count, node* ptr)
 				:external_count(external_count), ptr(ptr)
 			{}
+
+			template<typename T>
+			inline bool queue<T>::empty() const
+			{
+				counted_node_ptr old_head = head.load(std::memory_order_relaxed);
+				counted_node_ptr old_tail = tail.load(std::memory_order_relaxed);
+				return old_head.ptr == old_tail.ptr;
+			}
 		}
 	}
 }

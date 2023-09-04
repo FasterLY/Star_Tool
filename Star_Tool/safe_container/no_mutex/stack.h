@@ -32,6 +32,10 @@ namespace star {
 				* 返回栈顶元素的指针并且将栈顶元素弹出
 				*/
 				std::shared_ptr<T> pop();
+				/*
+				* 返回栈是否为空
+				*/
+				bool empty() const;
 			private:
 				struct node {
 					std::shared_ptr<T> data;
@@ -76,6 +80,12 @@ namespace star {
 				std::shared_ptr<node> old_head = head.load();
 				while (old_head && !head.compare_exchange_weak(old_head, old_head->next));
 				return old_head ? old_head->data : nullptr;
+			}
+
+			template<class T>
+			inline bool stack<T>::empty() const
+			{
+				return head.load() == nullptr;
 			}
 		}
 	}
