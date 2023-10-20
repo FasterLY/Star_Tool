@@ -30,7 +30,7 @@ namespace star {
     class resume_waiter 
     {
     private:
-        function<void()> function_handle;
+        std::function<void()> function_handle;
     public:
         template<typename Function,typename... Args>
         resume_waiter(Function&& function,Args&&... args) {
@@ -50,7 +50,7 @@ namespace star {
     class suspend_waiter
     {
     private:
-        function<void()> function_handle;
+        std::function<void()> function_handle;
     public:
         template<typename Function, typename... Args>
         suspend_waiter(Function&& function, Args&&... args) {
@@ -77,8 +77,9 @@ namespace star {
         class promise_type;
         class iterator;
     public:
+        /* 警告：请勿手动调用该方法，否则会造成不可预料后果 */
         co_handle(promise_type* coroutine_promise_ptr) :coroutine_promise_ptr(coroutine_promise_ptr) {}
-        iterator begin() { if (suspend) return resume(); return iterator{ this }; }
+        iterator begin() { return iterator{ this }; }
         nullptr_t end() { return nullptr; }
         iterator resume() { std::coroutine_handle<promise_type>::from_promise(*coroutine_promise_ptr)(); return iterator{ this }; }
         bool isEnd() { return coroutine_promise_ptr->coroutine_end_flag; }
